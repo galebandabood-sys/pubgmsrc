@@ -58,9 +58,9 @@ using namespace std::chrono_literals;
 
 #define HOOK(target, hook, original) Tools::Hook((void *)(target), (void *)(hook), (void **)(original))
 // Hook / Imgui
-#include "imgui/imgui.h"
-#include "imgui/backends/imgui_impl_android.h"
-#include "imgui/backends/imgui_impl_opengl3.h"
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_impl_android.h"
+#include "ImGui/imgui_impl_opengl3.h"
 //--------------------------- WOLTAJ/Helper
 #include "XorStr.h"
 #include "obfuscate.h"
@@ -76,7 +76,7 @@ using namespace std::chrono_literals;
 #include "../FTools/Font.h"
 #include "../FTools/Icon.h"
 #include "../FTools/FontPC.h"
-#include "../imgui/imgui_internal.h"
+#include "ImGui/imgui_internal.h"
 #include "imgui_notify.h"
 #include "fake_dlfcn.h"
 #include <math.h>
