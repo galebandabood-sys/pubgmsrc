@@ -21,3 +21,15 @@
 انزل APK فقط من تشغيل GitHub Actions الناجح في فرع `nova-native-ui-diagnostic`، وافتح تطبيق `NOVA Native Diagnostics` واضغط زر **فحص ملفات النسخة الأصلية**. ظهور نتيجة إيجابية يدل على تغليف المكتبة، وليس تشغيلها داخل اللعبة.
 
 يمكن فتح التغييرات: https://github.com/galebandabood-sys/pubgmsrc/pull/4
+
+## نتيجة البناء المؤكدة — 14 نوفمبر 2026
+
+- GitHub Actions: https://github.com/galebandabood-sys/pubgmsrc/actions/runs/43614714366
+- مهمة `assembleDebug`: ناجحة.
+- مهمة التحقق من `com.RIYAZSRC.MainActivity` و`classes.dex` و`libItsMyHubS.so`: ناجحة.
+- اسم الـArtifact: `NOVA-original-launcher-diagnostic-apk`، يحتوي `app-debug.apk`.
+- تم تنزيل الـArtifact وفحص APK محلياً: `classes.dex` يحتوي الكلاس `Lcom/RIYAZSRC/MainActivity;` والمكتبة `lib/arm64-v8a/libItsMyHubS.so` موجودة.
+- حجم `app-debug.apk`: 6,417,662 بايت.
+- فحص SHA256: `8ed8c3e8b7c798d500a9bf3c82033633fbef5e39bad6d2a6c7ddd1d09273aee8`.
+- **لم يتم تشغيل النسخة على جهاز أندرويد فعلي. ولم يتم تشغيل المنيو الأصلي داخل PUBG.**
+- شاشة الـActivity الجديدة *تشخيص* لوجود مكتبة C++، وليست منيو غش شغّال أو تجاوز مكافحة الغش.
