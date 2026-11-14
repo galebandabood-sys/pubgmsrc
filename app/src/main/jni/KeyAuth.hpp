@@ -386,8 +386,6 @@ curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, /*POST*/ StrEnc(",IL=", "\x7C\x06\
 
 #include <iostream>
 #include <curl/curl.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
 #include <iostream>
 #include <iomanip>
 #include <ctime>

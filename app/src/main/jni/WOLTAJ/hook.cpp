@@ -1,6 +1,6 @@
 #include "WOLTAJ/patch/Includes.h"
 #include "WOLTAJ/patch/MemoryPatch.h"
-#include "WOLTAJ/patch/OBFUSCATE.h"
+#include "WOLTAJ/patch/obfuscate.h"
 #include "WOLTAJ/patch/Utils.h"
 #include "WOLTAJ/patch/Macros.h"
 #include <list>
