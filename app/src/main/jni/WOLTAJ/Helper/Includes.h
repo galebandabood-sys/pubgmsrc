@@ -62,7 +62,7 @@ using namespace std::chrono_literals;
 #include "ImGui/imgui_impl_android.h"
 #include "ImGui/imgui_impl_opengl3.h"
 //--------------------------- WOLTAJ/Helper
-#include "XorStr.h"
+#include "xorstr.h"
 #include "obfuscate.h"
 #include "json.hpp"
 #include "StrEnc.h"
