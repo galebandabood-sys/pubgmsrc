@@ -41,5 +41,5 @@ android {
 }
 
 dependencies {
-    implementation 'io.github.vvb2060.ndk:curl:8.18.0'
+    implementation 'io.github.vvb2060.ndk:curl:8.8.0'
 }
