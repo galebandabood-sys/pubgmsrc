@@ -12,6 +12,11 @@
         android:theme="@android:style/Theme.Material.NoActionBar">
 
         <activity
+            android:name=".NativePreviewActivity"
+            android:label="NOVA Native ImGui Preview"
+            android:exported="false"/>
+
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name">
