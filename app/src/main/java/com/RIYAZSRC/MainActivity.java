@@ -1,6 +1,7 @@
 package com.RIYAZSRC;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -108,6 +109,23 @@ public final class MainActivity extends Activity {
         LinearLayout.LayoutParams bl = new LinearLayout.LayoutParams(-1, dp(55));
         bl.topMargin = dp(8);
         content.addView(test, bl);
+
+        Button previewButton = new Button(this);
+        previewButton.setAllCaps(false);
+        previewButton.setText("فتح منيو ImGui الأصلي — تجربة رسم ولمس");
+        previewButton.setTextColor(white);
+        previewButton.setTextSize(15);
+        previewButton.setBackground(background(Color.rgb(47, 60, 92), purple, 12));
+        LinearLayout.LayoutParams pbl = new LinearLayout.LayoutParams(-1, dp(58));
+        pbl.topMargin = dp(14);
+        content.addView(previewButton, pbl);
+        previewButton.setOnClickListener(v ->
+            startActivity(new Intent(this, NativePreviewActivity.class)));
+        TextView previewHint = text(
+            "يفتح رسم ImGui الحقيقي بـ C++ وOpenGL ES. هذه معاينة منفصلة، مو منيو داخل ببجي ولا تتعامل ويا ملفات اللعبة.",
+            12, muted, false);
+        previewHint.setPadding(0, dp(7), 0, dp(13));
+        content.addView(previewHint);
 
         result = text("اضغط الزر لفحص وجود مكتبة C++ بالـAPK.", 13, muted, false);
         result.setPadding(0, dp(16), 0, dp(12));
