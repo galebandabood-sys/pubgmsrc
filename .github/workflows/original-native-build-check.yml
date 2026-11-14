@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - nova-original-build-repair
+      - nova-native-ui-diagnostic
     paths:
       - "app/**"
       - "build.gradle"
