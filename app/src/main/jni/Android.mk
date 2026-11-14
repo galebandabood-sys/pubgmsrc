@@ -35,5 +35,8 @@ SDK/FURKAN_ShadowTrackerExtra_functions.cpp \
 SDK/FURKAN_Client_functions.cpp
 LOCAL_CPP_FEATURES := exceptions
 LOCAL_LDLIBS := -llog -landroid -lEGL -lGLESv2 -lGLESv3 -lGLESv1_CM -lz
-LOCAL_STATIC_LIBRARIES := libdobby
+LOCAL_STATIC_LIBRARIES := libdobby curl_static
 include $(BUILD_SHARED_LIBRARY)
+
+include $(call all-makefiles-under,$(NDK_GRADLE_INJECTED_IMPORT_PATH))
+$(call import-module,prefab/curl)
