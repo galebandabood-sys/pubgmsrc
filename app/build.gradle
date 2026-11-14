@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 31
-    buildToolsVersion "31.0.2"
+    buildToolsVersion "31.0.0"
     defaultConfig {
         applicationId "com.power.admin"
         minSdkVersion 29
@@ -11,7 +11,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         ndk {
-            abiFilters "armeabi-v7a", "arm64-v8a"
+            abiFilters "arm64-v8a"
         }
         multiDexEnabled false
     }
@@ -25,10 +25,12 @@ android {
         }
     }
     externalNativeBuild {
-        cmake {
+        ndkBuild {
             path "src/main/jni/Android.mk"
-            version "3.10.2"
         }
+    }
+    buildFeatures {
+        prefab true
     }
     compileOptions {
         // This library uses Java 8 features, this is required
@@ -39,4 +41,5 @@ android {
 }
 
 dependencies {
+    implementation 'io.github.vvb2060.ndk:curl:8.8.0'
 }

@@ -14,8 +14,8 @@ LOCAL_CPPFLAGS += -Wno-error=c++11-narrowing -fms-extensions -fno-rtti -fno-exce
 LOCAL_LDFLAGS += -Wl,--gc-sections,--strip-all -llog
 LOCAL_ARM_MODE := arm
 LOCAL_C_INCLUDES += $(MAIN_LOCAL_PATH)
-LOCAL_C_INCLUDES += $(MAIN_LOCAL_PATH)/imgui
-LOCAL_SRC_FILES := main.cpp \
+LOCAL_C_INCLUDES += $(MAIN_LOCAL_PATH)/ImGui
+LOCAL_SRC_FILES := Main.cpp \
 WOLTAJ/hook.cpp \
 WOLTAJ/patch/KittyMemory.cpp \
 WOLTAJ/patch/MemoryPatch.cpp \
@@ -35,5 +35,7 @@ SDK/FURKAN_ShadowTrackerExtra_functions.cpp \
 SDK/FURKAN_Client_functions.cpp
 LOCAL_CPP_FEATURES := exceptions
 LOCAL_LDLIBS := -llog -landroid -lEGL -lGLESv2 -lGLESv3 -lGLESv1_CM -lz
-LOCAL_STATIC_LIBRARIES := libdobby
+LOCAL_STATIC_LIBRARIES := libdobby curl_static
 include $(BUILD_SHARED_LIBRARY)
+
+$(call import-module,prefab/curl)
