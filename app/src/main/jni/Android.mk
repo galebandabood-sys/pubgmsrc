@@ -45,4 +45,20 @@ LOCAL_LDLIBS := -llog -landroid -lEGL -lGLESv2 -lGLESv3 -lGLESv1_CM -lz
 LOCAL_STATIC_LIBRARIES := libdobby curl_static shadowhook_prebuilt
 include $(BUILD_SHARED_LIBRARY)
 
+
+# Independent genuine Dear ImGui preview for the standalone Activity.
+# No Dobby, ShadowHook, network, or game-memory module is used in this library.
+include $(CLEAR_VARS)
+LOCAL_MODULE := nova_preview
+LOCAL_C_INCLUDES := $(MAIN_LOCAL_PATH) $(MAIN_LOCAL_PATH)/ImGui
+LOCAL_CPPFLAGS := -std=c++17 -DIMGUI_IMPL_OPENGL_ES3
+LOCAL_SRC_FILES := ImGui/NovaNativePreview.cpp \
+    ImGui/imgui.cpp \
+    ImGui/imgui_draw.cpp \
+    ImGui/imgui_tables.cpp \
+    ImGui/imgui_widgets.cpp \
+    ImGui/imgui_impl_opengl3.cpp
+LOCAL_LDLIBS := -lGLESv3 -lEGL -llog
+include $(BUILD_SHARED_LIBRARY)
+
 $(call import-module,prefab/curl)
