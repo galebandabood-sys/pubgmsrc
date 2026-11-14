@@ -188,8 +188,10 @@ public class MainActivity extends Activity {
         parent.addView(bottom);
     }
 
+    private interface ToggleChange { void changed(boolean value); }
+
     private void toggle(LinearLayout parent, String title, String note,
-                        boolean checked, java.util.function.Consumer<Boolean> change) {
+                        boolean checked, ToggleChange change) {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
@@ -204,7 +206,7 @@ public class MainActivity extends Activity {
         Switch control = new Switch(this);
         control.setChecked(checked);
         row.addView(control);
-        control.setOnCheckedChangeListener((button, enabled) -> change.accept(enabled));
+        control.setOnCheckedChangeListener((button, enabled) -> change.changed(enabled));
         parent.addView(row);
     }
 
