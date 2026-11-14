@@ -19,3 +19,11 @@
 افتح [GitHub Actions](https://github.com/galebandabood-sys/pubgmsrc/actions) واختر فحص **Original native Android build check** ثم انظر نتيجة `Compile original app (diagnostic)`.
 
 لا يوجد ضمان أو تأكيد بتوافق PUBG Mobile الحديثة.
+
+## آخر نتيجة فحص فعلية (14 نوفمبر 2026)
+- نتيجة GitHub Actions: **فشل بناء المشروع الأصلي**.
+- بعد إصلاح إعدادات Gradle، NDK، ومسارات ImGui و `xorstr.h` و `icon.h`، وصل المترجم إلى `app/src/main/jni/KeyAuth.hpp:267`.
+- الخطأ: `fatal error: 'curl/curl.h' file not found`.
+- هذا اعتماد خارجي ناقص (libcurl headers + مكتبة Android arm64). لا يكفي إنشاء ترويسة فارغة أو تجاهل الخطأ؛ يلزم توفير اعتماد أصلي متوافق والتحقق من ربطه وترخيصه.
+- سجل البناء: https://github.com/galebandabood-sys/pubgmsrc/actions/runs/43610297972
+- **لم ينتج APK أصلي صالح أو مختبر من هذا الفحص.**
