@@ -16,7 +16,6 @@ LOCAL_ARM_MODE := arm
 LOCAL_C_INCLUDES += $(MAIN_LOCAL_PATH)
 LOCAL_C_INCLUDES += $(MAIN_LOCAL_PATH)/ImGui
 LOCAL_SRC_FILES := Main.cpp \
-WOLTAJ/diagnostic_stub.cpp \
 WOLTAJ/patch/KittyMemory.cpp \
 WOLTAJ/patch/MemoryPatch.cpp \
 WOLTAJ/patch/MemoryBackup.cpp \
