@@ -21,3 +21,12 @@ https://github.com/galebandabood-sys/pubgmsrc/actions/runs/43612337704
 
 ## تنبيه
 هذا فرع مؤقت لقياس مشاكل البناء. **لا تدمجه في main ولا تعتبر أي ناتج منه مود يعمل داخل ببجي.**
+
+## نتيجة نجاح البناء التشخيصي — 14 نوفمبر 2026
+- GitHub Actions run: https://github.com/galebandabood-sys/pubgmsrc/actions/runs/43613298029
+- `assembleDebug`: **SUCCESS** بعد التحديث إلى NDK r26c وربط `Tools.cpp` و `shadowhook`.
+- أنتج Artifact باسم `original-app-debug-unverified` وفيه APK حجم 6.4 MB تقريباً.
+- فحصنا ملف `classes.dex` داخل الـAPK: يحتوي BuildConfig وR وعناصر موارد فقط؛ **لا يحتوي `Lcom/RIYAZSRC/MainActivity;` أو كلاس MainActivity آخر**.
+- الملف `lib/arm64-v8a/libItsMyHubS.so` موجود في الحزمة لكن ذلك لا يتيح إظهار المنيو داخل لعبة أخرى تلقائياً.
+- لذلك **هذا ليس APK قابلًا لتشغيل المنيو بصورة متكاملة، ولا ينبغي تثبيته على الجهاز الأساسي أو دمجه في main**.
+- نجاح التجميع تحقق فقط بعد استبعاد `WOLTAJ/hook.cpp`؛ ميزات هذا الملف غير موجودة في ناتج التشخيص، ولم يتم اختبار أي إصدار PUBG.
