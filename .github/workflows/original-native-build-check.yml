@@ -60,9 +60,25 @@ jobs:
       - name: Compile original app (diagnostic)
         run: gradle --no-daemon --stacktrace assembleDebug
 
-      - name: Upload APK if build succeeds
+      - name: Verify a real launcher and native library are packaged
+        run: |
+          set -eu
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          "$ANDROID_HOME/build-tools/31.0.0/aapt" dump badging "$APK" | grep -F "launchable-activity: name='com.RIYAZSRC.MainActivity'"
+          python3 - <<'PY'
+          from zipfile import ZipFile
+          apk = "app/build/outputs/apk/debug/app-debug.apk"
+          with ZipFile(apk) as z:
+              names = set(z.namelist())
+              assert "classes.dex" in names, "Launcher DEX missing"
+              assert b"Lcom/RIYAZSRC/MainActivity;" in z.read("classes.dex"), "MainActivity class not present in DEX"
+              assert "lib/arm64-v8a/libItsMyHubS.so" in names, "Original C++ library missing"
+              print("PASS: MainActivity, classes.dex, and arm64 native library are packaged.")
+          PY
+
+      - name: Upload verified diagnostic launcher APK
         uses: actions/upload-artifact@v4
         with:
-          name: original-app-debug-unverified
+          name: NOVA-original-launcher-diagnostic-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
