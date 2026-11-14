@@ -2,6 +2,10 @@ package com.nova.demomenu;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.Settings;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -115,7 +119,7 @@ public class MainActivity extends Activity {
         LinearLayout heading = vertical();
         pad(heading, 22, 17);
         TextView brand = label("NOVA  /  نوفا", 26, WHITE, true);
-        TextView sub = label("لوحة تحكم عربية مستقلة • نسخة تجريبية", 12, MUTED, false);
+        TextView sub = label("لوحة تحكم عربية + فقاعة عائمة فوق التطبيقات", 12, MUTED, false);
         heading.addView(brand);
         heading.addView(sub);
         root.addView(heading);
@@ -154,7 +158,7 @@ public class MainActivity extends Activity {
         scroll.addView(panels);
         root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1f));
 
-        TextView footer = label("NOVA 1.0  •  واجهة تجريبية بدون صلاحيات حساسة", 11, MUTED, false);
+        TextView footer = label("NOVA 2.0  •  منيو عائم مستقل • بدون هوكات للعبة", 11, MUTED, false);
         footer.setGravity(Gravity.CENTER);
         pad(footer, 12, 14);
         root.addView(footer);
@@ -225,14 +229,78 @@ public class MainActivity extends Activity {
     }
 
     private void home() {
-        LinearLayout hello = card("أهلاً بيك في NOVA", "تصميم عصري وخفيف للأندرويد");
-        info(hello, "الحالة: جاهز للمعاينة", "الواجهة تعمل داخل هذا التطبيق فقط؛ ما تتصل بببجي أو بعمليات ثانية.");
-        action(hello, "استكشف إعدادات المظهر", v -> { currentTab = 1; render(); });
+        LinearLayout hello = card("NOVA — المنيو العائم", "افتح الفقاعة فوق التطبيقات المسموح بها");
+        info(hello, "منيو حقيقي بنظام أندرويد", "الفقاعة قابلة للسحب والفتح والإغلاق. لا تتصل بذاكرة ببجي.");
+        info(hello, "حالة إذن الظهور", Settings.canDrawOverlays(this) ? "مفعّل ✓" : "غير مفعّل — يلزم إذن من إعدادات أندرويد");
+        action(hello, "1. السماح بالظهور فوق التطبيقات", v -> askOverlayPermission());
+        action(hello, "2. تشغيل الفقاعة العائمة", v -> startFloatingMenu());
+        action(hello, "3. فتح PUBG Mobile", v -> launchPubg());
 
-        LinearLayout status = card("مميزات النسخة", "واجهة مرتبة وسهلة على الموبايل");
-        info(status, "ألوان قابلة للتغيير", "أربع درجات للألوان مع حفظ الاختيار.");
-        info(status, "الخصوصية", "منع لقطات الشاشة وإيقاف إطفاء الشاشة من داخل التطبيق.");
-        info(status, "بدون صلاحيات إضافية", "لا روت، لا اتصال بالشبكة، ولا تعديلات ذاكرة.");
+        LinearLayout live = card("الميزات الموجودة وتشتغل", "كل الخيارات هذه داخل NOVA فقط");
+        info(live, "الفقاعة المتحركة", "اسحب N لأي مكان، واضغط عليها حتى يفتح المنيو.");
+        info(live, "ساعة ومؤقت تركيز", "مؤقت 5 دقائق + إضافة دقيقة + إيقاف، ويظهر على الفقاعة.");
+        info(live, "التصميم", "تغيير الألوان والشفافية، وحفظ الإعدادات.");
+        action(live, "إيقاف المنيو العائم", v -> {
+            Intent stop = new Intent(this, OverlayService.class).setAction(OverlayService.ACTION_STOP);
+            startService(stop);
+            Toast.makeText(this, "تم إرسال أمر الإيقاف", Toast.LENGTH_SHORT).show();
+        });
+
+        LinearLayout scope = card("مهم بخصوص اللعبة", "توافق الطبقات العائمة يختلف حسب الجهاز واللعبة");
+        info(scope, "لا يوجد حقن أو تعديل ذاكرة", "NOVA Overlay لا يشغل ESP أو Aim أو Bypass ولا يعدّل ملفات اللعبة.");
+        info(scope, "على آخر إصدار من PUBG", "إذا سمح النظام واللعبة بالطبقات العائمة، تقدر تشوف الفقاعة فوقها. غير مضمون على جميع الأجهزة.");
+    }
+
+    private void askOverlayPermission() {
+        if (Settings.canDrawOverlays(this)) {
+            Toast.makeText(this, "الإذن مفعّل بالفعل", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent permission = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:" + getPackageName()));
+        try {
+            startActivity(permission);
+        } catch (Exception e) {
+            Toast.makeText(this, "افتح إعدادات الهاتف وفعّل الظهور فوق التطبيقات لـ NOVA", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void startFloatingMenu() {
+        if (!Settings.canDrawOverlays(this)) {
+            askOverlayPermission();
+            return;
+        }
+        Intent overlay = new Intent(this, OverlayService.class);
+        try {
+            if (Build.VERSION.SDK_INT >= 26) startForegroundService(overlay);
+            else startService(overlay);
+            Toast.makeText(this, "منيو NOVA العائم شغال — اضغط فقاعة N", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "فشل تشغيل المنيو. راجع أذونات التطبيق.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void launchPubg() {
+        String[] packages = {"com.tencent.ig", "com.pubg.imobile", "com.pubg.krmobile", "com.vng.pubgmobile"};
+        for (String pkg : packages) {
+            try {
+                Intent launch = getPackageManager().getLaunchIntentForPackage(pkg);
+                if (launch != null) {
+                    startActivity(launch);
+                    return;
+                }
+            } catch (Exception ignored) { }
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("PUBG Mobile غير موجودة بالقائمة")
+                .setMessage("افتح اللعبة بشكل عادي من شاشة الهاتف. إذا شغّلت NOVA قبلها، تبقى الفقاعة طالما النظام يسمح بإظهارها.")
+                .setPositiveButton("تمام", null)
+                .show();
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        if (root != null) render();
     }
 
     private void appearance() {
@@ -285,11 +353,11 @@ public class MainActivity extends Activity {
     }
 
     private void about() {
-        LinearLayout details = card("عن NOVA", "إصدار 1.0 • Android demo");
+        LinearLayout details = card("عن NOVA", "إصدار 2.0 • Android floating menu");
         info(details, "نوع المشروع", "تطبيق مستقل لتجربة تصميم المنيو.");
         info(details, "التوافق", "Android 6.0 وما بعده (حسب إعدادات البناء).");
         info(details, "الحماية", "بدون صلاحيات حساسة، مع إعداد أمان للشاشة.");
-        info(details, "ببجي موبايل", "هذا التطبيق لا يحقن مكتبات ولا يغيّر ملفات أو ذاكرة اللعبة.");
+        info(details, "ببجي موبايل", "يظهر فوق التطبيقات التي تسمح بذلك ولا يحقن مكتبات أو يعدّل اللعبة.");
         action(details, "رجوع للرئيسية", v -> { currentTab = 0; render(); });
     }
 }
