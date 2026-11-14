@@ -74,7 +74,7 @@ using namespace std::chrono_literals;
 #include "../FTools/ImguiPP.h"
 #include "font_awesome_6.h"
 #include "../FTools/Font.h"
-#include "../FTools/Icon.h"
+#include "../FTools/icon.h"
 #include "../FTools/FontPC.h"
 #include "ImGui/imgui_internal.h"
 #include "imgui_notify.h"
