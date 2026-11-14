@@ -33,8 +33,10 @@ const ImVec4 accents[4] = {
 };
 
 void applyTheme() {
-    ImGui::StyleColorsDark();
+    // Reset per-frame baseline so density scaling never accumulates over time.
     ImGuiStyle& style = ImGui::GetStyle();
+    style = ImGuiStyle();
+    ImGui::StyleColorsDark();
     style.WindowPadding = ImVec2(16.f, 14.f);
     style.FramePadding = ImVec2(12.f, 10.f);
     style.ItemSpacing = ImVec2(10.f, 12.f);
