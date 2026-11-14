@@ -1,0 +1,62 @@
+name: NOVA Android demo APK
+
+on:
+  push:
+    branches:
+      - nova-android-build-ui
+    paths:
+      - 'nova-demo/**'
+      - '.github/workflows/nova-demo-android.yml'
+  pull_request:
+    paths:
+      - 'nova-demo/**'
+      - '.github/workflows/nova-demo-android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Java 17 for Android SDK command-line tools
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
+
+      - name: Install Android 31
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-31" "build-tools;31.0.0" "platform-tools"
+
+      - name: Java 11 for legacy Android Gradle Plugin
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Set up Gradle 7.0.2
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '7.0.2'
+
+      - name: Build standalone demo
+        run: gradle -p nova-demo --no-daemon --stacktrace assembleDebug
+
+      - name: Upload demo APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: NOVA-demo-debug-apk
+          path: nova-demo/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
