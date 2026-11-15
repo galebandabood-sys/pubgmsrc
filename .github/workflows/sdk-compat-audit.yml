@@ -1,0 +1,43 @@
+name: SDK provenance and compatibility audit
+
+on:
+  push:
+    paths:
+      - "tools/sdk_compat_audit.py"
+      - "tests/test_sdk_compat_audit.py"
+      - "app/src/main/jni/Offset.h"
+      - ".github/workflows/sdk-compat-audit.yml"
+  pull_request:
+    paths:
+      - "tools/sdk_compat_audit.py"
+      - "tests/test_sdk_compat_audit.py"
+      - "app/src/main/jni/Offset.h"
+      - ".github/workflows/sdk-compat-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sdk-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run 9 SDK provenance tests
+        run: python3 -m unittest discover -s tests -p 'test_sdk_compat_audit.py' -v
+      - name: Report unverified PUBG 4.7 compatibility without exact ELF and SDK profile
+        run: |
+          set +e
+          python3 tools/sdk_compat_audit.py \
+            --offsets app/src/main/jni/Offset.h \
+            --package com.tencent.ig \
+            --version 4.7.0 \
+            --output sdk-audit-report.json
+          code=$?
+          set -e
+          test "$code" -eq 2
+          python3 -c 'import json; d=json.load(open("sdk-audit-report.json")); assert d["status"] == "UNVERIFIED"; print("PASS: no false 4.7 compatibility claim")'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pubg-sdk-evidence-report
+          path: sdk-audit-report.json
