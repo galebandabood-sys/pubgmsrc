@@ -2,6 +2,10 @@ package com.RIYAZSRC;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
+import android.provider.Settings;
+import android.os.Build;
+import android.widget.Toast;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -94,11 +98,11 @@ public final class MainActivity extends Activity {
         content.addView(caption);
 
         addCard("شنو يشتغل بهذه النسخة؟",
-            "هذه شاشة تشغيل حقيقية لتطبيق app/ الأصلي. تكدر تتأكد من سلامة التغليف ووجود مكتبة C++ بدون تحميلها.");
+            "هذه شاشة تشغيل حقيقية لتطبيق app/ الأصلي. تفحص مكتبة C++ وتشغّل منيو ImGui العائم المستقل.");
         addCard("ليش المنيو ما يفتح داخل اللعبة؟",
-            "مصدر ImGui الأصلي يعتمد على كائنات وذاكرة داخل عملية اللعبة، وليس على تشغيل APK منفصل. هذه النسخة لا تحقن كوداً في ببجي ولا تتجاوز حمايتها.");
+            "فتح المنيو فوق اللعبة يعتمد على سماح أندرويد واللعبة بالطبقات العائمة. خيارات ImGui نفسها تشتغل، لكن الميزات المعتمدة على ذاكرة اللعبة تحتاج SDK صالحاً واختباراً خاصاً.");
         addCard("السلامة",
-            "ملف hook.cpp المعطّل مستثنى من هذا البناء التشخيصي. ما نطلب أذونات VPN أو موقع أو وصول لبيانات اللعبة.");
+            "نطلب إذن الظهور فوق التطبيقات فقط، وتستخدم الفقاعة إشعاراً دائماً لإيقافها. لا نحمّل مكتبة الهوكات القديمة داخل المنيو العائم.");
 
         Button test = new Button(this);
         test.setAllCaps(false);
@@ -122,10 +126,75 @@ public final class MainActivity extends Activity {
         previewButton.setOnClickListener(v ->
             startActivity(new Intent(this, NativePreviewActivity.class)));
         TextView previewHint = text(
-            "يفتح رسم ImGui الحقيقي بـ C++ وOpenGL ES. هذه معاينة منفصلة، مو منيو داخل ببجي ولا تتعامل ويا ملفات اللعبة.",
+            "يفتح رسم ImGui الحقيقي بـ C++ وOpenGL ES. هذه معاينة منفصلة داخل التطبيق.",
             12, muted, false);
         previewHint.setPadding(0, dp(7), 0, dp(13));
         content.addView(previewHint);
+
+        addCard("منيو ImGui فوق اللعبة",
+            "فعّل إذن أندرويد وشغّل فقاعة N. الضغط عليها يفتح منيو C++ حقيقي فوق أي تطبيق يسمح بالطبقات العائمة. خيارات اللون والشفافية والتبويبات تعمل فعلاً، لكن ESP وAim وباقي التعديلات على ذاكرة ببجي غير متصلة.");
+        Button grant = new Button(this);
+        grant.setAllCaps(false);
+        grant.setText("1. السماح بالظهور فوق التطبيقات");
+        content.addView(grant);
+        grant.setOnClickListener(v -> {
+            if (Settings.canDrawOverlays(this)) {
+                Toast.makeText(this, "إذن الظهور مفعّل بالفعل", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            try { startActivity(intent); }
+            catch (Exception error) {
+                Toast.makeText(this, "افتح إعدادات أندرويد وفعّل إذن الظهور", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        Button overlay = new Button(this);
+        overlay.setAllCaps(false);
+        overlay.setText("2. تشغيل منيو ImGui العائم");
+        content.addView(overlay);
+        overlay.setOnClickListener(v -> {
+            if (!Settings.canDrawOverlays(this)) {
+                grant.performClick();
+                return;
+            }
+            try {
+                Intent i = new Intent(this, NativeOverlayService.class);
+                if (Build.VERSION.SDK_INT >= 26) startForegroundService(i);
+                else startService(i);
+                Toast.makeText(this, "شغّلت فقاعة N — افتح اللعبة واضغط عليها", Toast.LENGTH_LONG).show();
+            } catch (RuntimeException error) {
+                Toast.makeText(this, "أندرويد منع تشغيل خدمة المنيو: " +
+                        error.getClass().getSimpleName(), Toast.LENGTH_LONG).show();
+            }
+        });
+
+        Button launch = new Button(this);
+        launch.setAllCaps(false);
+        launch.setText("3. فتح PUBG Mobile المثبّتة");
+        content.addView(launch);
+        launch.setOnClickListener(v -> {
+            for (String pkg : new String[]{"com.tencent.ig", "com.pubg.imobile",
+                    "com.pubg.krmobile", "com.vng.pubgmobile"}) {
+                Intent game = getPackageManager().getLaunchIntentForPackage(pkg);
+                if (game != null) {
+                    startActivity(game);
+                    return;
+                }
+            }
+            Toast.makeText(this, "ما لقيت نسخة مدعومة من ببجي؛ افتحها يدوياً", Toast.LENGTH_LONG).show();
+        });
+
+        Button stopOverlay = new Button(this);
+        stopOverlay.setAllCaps(false);
+        stopOverlay.setText("إيقاف الفقاعة والمنيو");
+        content.addView(stopOverlay);
+        stopOverlay.setOnClickListener(v -> {
+            boolean stopped = stopService(new Intent(this, NativeOverlayService.class));
+            Toast.makeText(this, stopped ? "تم إيقاف المنيو" : "المنيو متوقف بالفعل",
+                    Toast.LENGTH_SHORT).show();
+        });
 
         result = text("اضغط الزر لفحص وجود مكتبة C++ بالـAPK.", 13, muted, false);
         result.setPadding(0, dp(16), 0, dp(12));
