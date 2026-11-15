@@ -3,6 +3,8 @@ package com.nova.demomenu;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
@@ -33,6 +35,10 @@ public class MainActivity extends Activity {
     };
     private static final String[] ACCENT_NAMES = {"بنفسجي", "سماوي", "أخضر", "برتقالي"};
     private static final String[] TABS = {"الرئيسية", "المظهر", "الخصوصية", "حول"};
+    // Package visibility is declared for these games in AndroidManifest.xml.
+    private static final String[] PUBG_PACKAGES = {
+            "com.tencent.ig", "com.pubg.imobile", "com.pubg.krmobile", "com.vng.pubgmobile"
+    };
 
     private SharedPreferences preferences;
     private LinearLayout root;
@@ -158,7 +164,7 @@ public class MainActivity extends Activity {
         scroll.addView(panels);
         root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1f));
 
-        TextView footer = label("NOVA 2.0  •  منيو عائم مستقل • بدون هوكات للعبة", 11, MUTED, false);
+        TextView footer = label("NOVA 2.1  •  منيو عائم مستقل • بدون هوكات للعبة", 11, MUTED, false);
         footer.setGravity(Gravity.CENTER);
         pad(footer, 12, 14);
         root.addView(footer);
@@ -241,12 +247,14 @@ public class MainActivity extends Activity {
         info(live, "ساعة ومؤقت تركيز", "مؤقت 5 دقائق + إضافة دقيقة + إيقاف، ويظهر على الفقاعة.");
         info(live, "التصميم", "تغيير الألوان والشفافية، وحفظ الإعدادات.");
         action(live, "إيقاف المنيو العائم", v -> {
-            Intent stop = new Intent(this, OverlayService.class).setAction(OverlayService.ACTION_STOP);
-            startService(stop);
-            Toast.makeText(this, "تم إرسال أمر الإيقاف", Toast.LENGTH_SHORT).show();
+            // stopService does not create a new overlay merely to stop it.
+            boolean stopped = stopService(new Intent(this, OverlayService.class));
+            Toast.makeText(this, stopped ? "تم إيقاف المنيو العائم" : "المنيو متوقف بالفعل",
+                    Toast.LENGTH_SHORT).show();
         });
 
         LinearLayout scope = card("مهم بخصوص اللعبة", "توافق الطبقات العائمة يختلف حسب الجهاز واللعبة");
+        info(scope, "إصدار اللعبة المثبّت", installedGameVersion());
         info(scope, "لا يوجد حقن أو تعديل ذاكرة", "NOVA Overlay لا يشغل ESP أو Aim أو Bypass ولا يعدّل ملفات اللعبة.");
         info(scope, "على آخر إصدار من PUBG", "إذا سمح النظام واللعبة بالطبقات العائمة، تقدر تشوف الفقاعة فوقها. غير مضمون على جميع الأجهزة.");
     }
@@ -280,9 +288,21 @@ public class MainActivity extends Activity {
         }
     }
 
+    private String installedGameVersion() {
+        for (String pkg : PUBG_PACKAGES) {
+            try {
+                PackageInfo info = getPackageManager().getPackageInfo(pkg, 0);
+                String version = info.versionName == null ? "غير معروف" : info.versionName;
+                return pkg + " — " + version;
+            } catch (PackageManager.NameNotFoundException ignored) {
+                // Try the next supported PUBG Mobile package.
+            }
+        }
+        return "ما لقينا نسخة من ببجي ضمن الحزم المعروفة";
+    }
+
     private void launchPubg() {
-        String[] packages = {"com.tencent.ig", "com.pubg.imobile", "com.pubg.krmobile", "com.vng.pubgmobile"};
-        for (String pkg : packages) {
+        for (String pkg : PUBG_PACKAGES) {
             try {
                 Intent launch = getPackageManager().getLaunchIntentForPackage(pkg);
                 if (launch != null) {
@@ -353,7 +373,7 @@ public class MainActivity extends Activity {
     }
 
     private void about() {
-        LinearLayout details = card("عن NOVA", "إصدار 2.0 • Android floating menu");
+        LinearLayout details = card("عن NOVA", "إصدار 2.1 • Android floating menu");
         info(details, "نوع المشروع", "تطبيق مستقل لتجربة تصميم المنيو.");
         info(details, "التوافق", "Android 6.0 وما بعده (حسب إعدادات البناء).");
         info(details, "الحماية", "بدون صلاحيات حساسة، مع إعداد أمان للشاشة.");

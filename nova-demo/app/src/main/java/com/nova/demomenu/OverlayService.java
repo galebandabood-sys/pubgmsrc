@@ -207,8 +207,12 @@ public class OverlayService extends Service {
                 PixelFormat.TRANSLUCENT);
         bubbleParams.gravity = Gravity.TOP | Gravity.LEFT;
         int width = getResources().getDisplayMetrics().widthPixels;
-        bubbleParams.x = prefs.getInt("bubble_x", Math.max(0, width - dp(80)));
-        bubbleParams.y = prefs.getInt("bubble_y", dp(160));
+        int height = getResources().getDisplayMetrics().heightPixels;
+        // Keep a saved bubble position visible after screen-size/orientation changes.
+        bubbleParams.x = Math.max(0, Math.min(Math.max(0, width - dp(58)),
+                prefs.getInt("bubble_x", Math.max(0, width - dp(80)))));
+        bubbleParams.y = Math.max(0, Math.min(Math.max(0, height - dp(58)),
+                prefs.getInt("bubble_y", dp(160))));
         manager.addView(bubble, bubbleParams);
 
         bubble.setOnTouchListener(new View.OnTouchListener() {
