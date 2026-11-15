@@ -2,7 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.RIYAZSRC">
 
-    <!-- Diagnostic launcher only: no game-data access, overlay, root, VPN or network. -->
+    <!-- Android window overlay explicitly granted by the user. No game-data access, root or VPN. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <queries>
+        <package android:name="com.tencent.ig"/>
+        <package android:name="com.pubg.imobile"/>
+        <package android:name="com.pubg.krmobile"/>
+        <package android:name="com.vng.pubgmobile"/>
+    </queries>
     <application
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
@@ -10,6 +18,11 @@
         android:supportsRtl="true"
         android:usesCleartextTraffic="false"
         android:theme="@android:style/Theme.Material.NoActionBar">
+
+        <service
+            android:name=".NativeOverlayService"
+            android:exported="false"
+            android:process=":nova_overlay"/>
 
         <activity
             android:name=".NativePreviewActivity"
