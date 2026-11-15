@@ -328,8 +328,8 @@ curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, /*POST*/ StrEnc(",IL=", "\x7C\x06\
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &chunk);
 
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
 
         res = curl_easy_perform(curl);
         if (res == CURLE_OK) {
@@ -535,11 +535,11 @@ public:
             headers = curl_slist_append(headers, OBFUSCATE("X_NTH_REQUEST_BY: curl/openssl0.7.0"));
             headers = curl_slist_append(headers, OBFUSCATE("IF_YOU_CAN_SEE_IT: THEN_FUCK_YOU"));
 
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
             curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
             curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_string);
 
@@ -602,7 +602,7 @@ std::vector<channel_struct> chatget(std::string channelname)
 
   curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
 
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
@@ -610,7 +610,7 @@ std::vector<channel_struct> chatget(std::string channelname)
 
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
   
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
             
@@ -701,7 +701,7 @@ bool chatsend(std::string channelname, std::string message)
 
   curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
 
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
@@ -709,7 +709,7 @@ bool chatsend(std::string channelname, std::string message)
 
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
 
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
   
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
             
@@ -792,7 +792,7 @@ int license(const std::string license) {
   }
 
   std::string to_return;
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
 
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
@@ -800,7 +800,7 @@ int license(const std::string license) {
 
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
 
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
 
   
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
