@@ -355,7 +355,7 @@ void DrawMenu()
                         ImGui::Checkbox(GetLabel("Draw enemy line",     "Düşman Çizgisi"),     &Config.ESPMenu.Line);
                         ImGui::Checkbox(GetLabel("Draw enemy box",      "Düşman Kutusu"),      &Config.ESPMenu.Box);
                         ImGui::Checkbox(GetLabel("Show enemy name",     "Düşman İsmi"),        &Config.ESPMenu.Name);
-                        ImGui::Checkbox(GetLabel("Show enemy uid",       "Düşman UID"),         &Config.ESPMenu.TeamID);                       
+                        ImGui::TextDisabled("%s", GetLabel("Enemy UID unavailable in this SDK", "Düşman UID bu SDK'da yok"));                       
                         ImGui::Checkbox(GetLabel("Show enemy team",      "Takım Numarası"),     &Config.ESPMenu.TeamID);                       
                         ImGui::Checkbox(GetLabel("Show enemy health",   "Can Barı"),           &Config.ESPMenu.Health);
                         ImGui::Checkbox(GetLabel("Show enemy distance", "Mesafe"),             &Config.ESPMenu.Distance);
