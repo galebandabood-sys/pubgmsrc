@@ -67,6 +67,7 @@ jobs:
           APK="app/build/outputs/apk/debug/app-debug.apk"
           "$ANDROID_HOME/build-tools/31.0.0/aapt" dump badging "$APK" | grep -F "launchable-activity: name='com.RIYAZSRC.MainActivity'"
           "$ANDROID_HOME/build-tools/31.0.0/aapt" dump permissions "$APK" | grep -F "android.permission.SYSTEM_ALERT_WINDOW"
+          "$ANDROID_HOME/build-tools/31.0.0/aapt" dump permissions "$APK" | grep -F "android.permission.PACKAGE_USAGE_STATS"
           python3 - <<'PY'
           from zipfile import ZipFile
           apk = "app/build/outputs/apk/debug/app-debug.apk"
@@ -78,6 +79,7 @@ jobs:
               assert "lib/arm64-v8a/libnova_preview.so" in names, "Native ImGui preview library missing"
               assert b"Lcom/RIYAZSRC/NativePreviewActivity;" in z.read("classes.dex"), "NativePreviewActivity not present"
               assert b"Lcom/RIYAZSRC/NativeOverlayService;" in z.read("classes.dex"), "Real floating ImGui overlay service not present"
+              assert b"Lcom/RIYAZSRC/GameRuntime;" in z.read("classes.dex"), "Foreground-game watcher not packaged"
               print("PASS: launcher, ImGui preview, floating menu Service, original C++ and renderer libraries.")
           PY
 
