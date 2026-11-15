@@ -22,11 +22,16 @@ public final class NativePreviewActivity extends Activity {
         }
     }
 
-    private static native void nativeInit(float density);
-    private static native void nativeResize(int width, int height);
-    private static native void nativeTouch(float x, float y, boolean pressed);
-    private static native void nativeRender();
-    private static native void nativeShutdown();
+    static native void nativeInit(float density);
+    static native void nativeResize(int width, int height);
+    static native void nativeTouch(float x, float y, boolean pressed);
+    static native void nativeRender();
+    static native void nativeShutdown();
+    static native void nativeSetOverlayMode(boolean enabled);
+
+    static boolean isLibraryAvailable() {
+        return libraryAvailable;
+    }
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
