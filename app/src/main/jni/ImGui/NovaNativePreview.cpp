@@ -10,6 +10,7 @@
 
 namespace {
 bool ready = false;
+bool overlayMode = false;
 int widthPx = 1;
 int heightPx = 1;
 float density = 1.f;
@@ -82,7 +83,7 @@ void renderMenu() {
         ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove;
     ImGui::Begin("NOVA | Native ImGui", nullptr, flags);
     ImGui::TextColored(accents[accent], "NOVA  /  IMGUI ENGINE");
-    ImGui::TextDisabled("Compiled C++ renderer, real touch input");
+    ImGui::TextDisabled(overlayMode ? "Real floating native menu with touch" : "Compiled C++ renderer, real touch input");
     ImGui::Separator();
 
     const float buttonWidth = (ImGui::GetContentRegionAvail().x - 12.f*density)/3.f;
@@ -101,7 +102,7 @@ void renderMenu() {
         ImGui::BulletText("Touch interaction: active");
         ImGui::BulletText("Original native menu source: packaged separately");
         ImGui::Spacing();
-        ImGui::TextWrapped("No game process access, injection, ESP or aim modification occurs.");
+        ImGui::TextWrapped(overlayMode ? "Overlay controls are functional above apps that permit overlays. No ESP, aim modification or game memory access." : "No game process access, injection, ESP or aim modification occurs.");
     } else if (page == 1) {
         ImGui::Text("Appearance settings");
         ImGui::Separator();
@@ -127,7 +128,7 @@ void renderMenu() {
     }
     ImGui::Separator();
     if (showFps) ImGui::Text("FPS  %.1f", ImGui::GetIO().Framerate);
-    ImGui::TextDisabled("Native UI preview only - no PUBG support verified");
+    ImGui::TextDisabled(overlayMode ? "Tap floating N to hide the menu" : "Native UI preview only - no PUBG support verified");
     ImGui::End();
 }
 }
@@ -140,6 +141,9 @@ Java_com_RIYAZSRC_NativePreviewActivity_nativeInit(JNIEnv *, jclass, jfloat devi
         ready = false;
     }
     density = std::max(.8f, std::min(4.f, (float)deviceDensity));
+    overlayMode = false;
+    touching = false;
+    touchX = touchY = -1.f;
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.IniFilename = nullptr;
@@ -151,6 +155,11 @@ Java_com_RIYAZSRC_NativePreviewActivity_nativeInit(JNIEnv *, jclass, jfloat devi
     applyTheme();
     ready = ImGui_ImplOpenGL3_Init("#version 300 es");
     lastFrame = std::chrono::steady_clock::now();
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_RIYAZSRC_NativePreviewActivity_nativeSetOverlayMode(JNIEnv *, jclass, jboolean enabled) {
+    overlayMode = enabled == JNI_TRUE;
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -170,7 +179,8 @@ Java_com_RIYAZSRC_NativePreviewActivity_nativeTouch(JNIEnv *, jclass,
 extern "C" JNIEXPORT void JNICALL
 Java_com_RIYAZSRC_NativePreviewActivity_nativeRender(JNIEnv *, jclass) {
     glViewport(0, 0, widthPx, heightPx);
-    glClearColor(.027f, .041f, .080f, 1.f);
+    if (overlayMode) glClearColor(0.f, 0.f, 0.f, 0.f);
+    else glClearColor(.027f, .041f, .080f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
     if (!ready) return;
     ImGuiIO& io = ImGui::GetIO();
