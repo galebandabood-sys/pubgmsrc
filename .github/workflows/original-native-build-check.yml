@@ -1,0 +1,89 @@
+name: Original native Android build check
+
+on:
+  push:
+    branches:
+      - nova-original-build-repair
+      - nova-native-ui-diagnostic
+      - nova-native-imgui-preview
+    paths:
+      - "app/**"
+      - "build.gradle"
+      - "settings.gradle"
+      - "gradle/**"
+      - ".github/workflows/original-native-build-check.yml"
+  pull_request:
+    paths:
+      - "app/**"
+      - "build.gradle"
+      - "settings.gradle"
+      - "gradle/**"
+      - ".github/workflows/original-native-build-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-build-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout original repository
+        uses: actions/checkout@v4
+
+      - name: Java 17 for Android command-line SDK tools
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install Android SDK manager
+        uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools"
+
+      - name: Install Android API 31 and original NDK
+        run: |
+          sdkmanager "platforms;android-31" "build-tools;31.0.0" "ndk;26.3.11579264"
+
+      - name: Java 11 for Android Gradle Plugin 7
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "11"
+
+      - name: Gradle 7.0.2
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "7.0.2"
+
+      - name: Compile original app (diagnostic)
+        run: gradle --no-daemon --stacktrace assembleDebug
+
+      - name: Verify a real launcher and native library are packaged
+        run: |
+          set -eu
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          "$ANDROID_HOME/build-tools/31.0.0/aapt" dump badging "$APK" | grep -F "launchable-activity: name='com.RIYAZSRC.MainActivity'"
+          "$ANDROID_HOME/build-tools/31.0.0/aapt" dump permissions "$APK" | grep -F "android.permission.SYSTEM_ALERT_WINDOW"
+          python3 - <<'PY'
+          from zipfile import ZipFile
+          apk = "app/build/outputs/apk/debug/app-debug.apk"
+          with ZipFile(apk) as z:
+              names = set(z.namelist())
+              assert "classes.dex" in names, "Launcher DEX missing"
+              assert b"Lcom/RIYAZSRC/MainActivity;" in z.read("classes.dex"), "MainActivity class not present in DEX"
+              assert "lib/arm64-v8a/libItsMyHubS.so" in names, "Original C++ library missing"
+              assert "lib/arm64-v8a/libnova_preview.so" in names, "Native ImGui preview library missing"
+              assert b"Lcom/RIYAZSRC/NativePreviewActivity;" in z.read("classes.dex"), "NativePreviewActivity not present"
+              assert b"Lcom/RIYAZSRC/NativeOverlayService;" in z.read("classes.dex"), "Real floating ImGui overlay service not present"
+              print("PASS: launcher, ImGui preview, floating menu Service, original C++ and renderer libraries.")
+          PY
+
+      - name: Upload verified diagnostic launcher APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: NOVA-real-imgui-preview-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
