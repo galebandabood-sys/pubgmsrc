@@ -7,9 +7,12 @@
 #include <chrono>
 #include <cmath>
 #include <algorithm>
+#include <atomic>
 
 namespace {
 bool ready = false;
+std::atomic<int> overlayFlags{16};
+int selectedPage = 0;
 bool overlayMode = false;
 int widthPx = 1;
 int heightPx = 1;
@@ -73,62 +76,137 @@ void applyTheme() {
     style.ScaleAllSizes(density * scale);
 }
 
-void renderMenu() {
-    // Fill the screen at mobile density, remain legible in landscape/portrait.
-    float available = std::min((float)widthPx, 460.f * density);
-    float height = std::min((float)heightPx - 24.f*density, 640.f*density);
-    ImGui::SetNextWindowPos(ImVec2((widthPx-available)/2.f, (heightPx-height)/2.f), ImGuiCond_Always);
-    ImGui::SetNextWindowSize(ImVec2(available, height), ImGuiCond_Always);
-    ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove;
-    ImGui::Begin("NOVA | Native ImGui", nullptr, flags);
-    ImGui::TextColored(accents[accent], "NOVA  /  IMGUI ENGINE");
-    ImGui::TextDisabled(overlayMode ? "Real floating native menu with touch" : "Compiled C++ renderer, real touch input");
-    ImGui::Separator();
-
-    const float buttonWidth = (ImGui::GetContentRegionAvail().x - 12.f*density)/3.f;
-    if (ImGui::Button("Home", ImVec2(buttonWidth, 41.f*density))) page = 0;
-    ImGui::SameLine();
-    if (ImGui::Button("Style", ImVec2(buttonWidth, 41.f*density))) page = 1;
-    ImGui::SameLine();
-    if (ImGui::Button("Test", ImVec2(buttonWidth, 41.f*density))) page = 2;
-    ImGui::Spacing();
-
-    if (page == 0) {
-        ImGui::TextWrapped("This is the real Dear ImGui renderer from the original source repository.");
-        ImGui::Spacing();
-        ImGui::TextColored(ImVec4(.30f,.85f,.68f,1.f), "C++ RENDERING ACTIVE");
-        ImGui::BulletText("OpenGL ES 3.0: active");
-        ImGui::BulletText("Touch interaction: active");
-        ImGui::BulletText("Original native menu source: packaged separately");
-        ImGui::Spacing();
-        ImGui::TextWrapped(overlayMode ? "Overlay controls are functional above apps that permit overlays. No ESP, aim modification or game memory access." : "No game process access, injection, ESP or aim modification occurs.");
-    } else if (page == 1) {
-        ImGui::Text("Appearance settings");
-        ImGui::Separator();
-        if (ImGui::Button("Violet", ImVec2(buttonWidth, 38.f*density))) accent=0;
-        ImGui::SameLine();
-        if (ImGui::Button("Cyan", ImVec2(buttonWidth, 38.f*density))) accent=1;
-        ImGui::SameLine();
-        if (ImGui::Button("Green", ImVec2(buttonWidth, 38.f*density))) accent=2;
-        if (ImGui::Button("Orange", ImVec2(buttonWidth, 38.f*density))) accent=3;
-        ImGui::SliderFloat("Opacity", &panelOpacity, .72f, 1.f, "%.2f");
-        ImGui::SliderFloat("Corners", &borderRadius, 0.f, 22.f, "%.0f");
-        ImGui::Checkbox("Compact layout", &compact);
-        ImGui::TextDisabled("Settings affect only this preview.");
-    } else {
-        ImGui::Text("Working input tests");
-        ImGui::Separator();
-        ImGui::Checkbox("Show frame rate", &showFps);
-        ImGui::Checkbox("Show sample panel", &showSample);
-        static float testSlider = .50f;
-        ImGui::SliderFloat("Slider", &testSlider, 0.f, 1.f);
-        if (showSample) ImGui::ProgressBar(testSlider, ImVec2(-1.f, 0.f));
-        ImGui::TextDisabled("Drag and tap to confirm touch handling.");
+void menuToggle(const char* label, const char* detail, int bit) {
+    int oldValue = overlayFlags.load();
+    bool active = (oldValue & bit) != 0;
+    if (ImGui::Checkbox(label, &active)) {
+        overlayFlags.store(active ? (oldValue | bit) : (oldValue & ~bit));
     }
+    ImGui::TextDisabled("%s", detail);
+    ImGui::Spacing();
+}
+
+void moduleStatus(const char* name, const char* subtitle) {
     ImGui::Separator();
-    if (showFps) ImGui::Text("FPS  %.1f", ImGui::GetIO().Framerate);
-    ImGui::TextDisabled(overlayMode ? "Tap floating N to hide the menu" : "Native UI preview only - no PUBG support verified");
+    ImGui::Text("%s", name);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(1.f, .70f, .32f, 1.f), "  UNAVAILABLE");
+    ImGui::TextWrapped("%s", subtitle);
+    ImGui::Spacing();
+}
+
+bool navButton(const char* title, int index, float height) {
+    bool selected = selectedPage == index;
+    if (selected) {
+        ImGui::PushStyleColor(ImGuiCol_Button, accents[accent]);
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(.05f,.04f,.10f,1.f));
+    }
+    bool clicked = ImGui::Button(title, ImVec2(-1.f, height));
+    if (selected) ImGui::PopStyleColor(2);
+    if (clicked) selectedPage = index;
+    return clicked;
+}
+
+void renderMenu() {
+    float width = std::max(1.f, std::min((float)widthPx, 510.f * density));
+    float height = std::max(1.f,
+            std::min((float)heightPx - 8.f * density, 630.f * density));
+    ImGui::SetNextWindowPos(
+            ImVec2(((float)widthPx - width) * .5f, ((float)heightPx - height) * .5f),
+            ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_Always);
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings |
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar;
+    ImGui::Begin("##NOVA_PRIME_MENU", nullptr, flags);
+
+    ImGui::TextColored(accents[accent], "NOVA  PRIME");
+    ImGui::SameLine();
+    ImGui::TextDisabled("  /  ARM64  /  5.0");
+    ImGui::TextColored(ImVec4(.35f, .85f, .70f, 1.f),
+            overlayMode ? "GAME SESSION MODE  -  READY" : "LOCAL UI PREVIEW");
+    ImGui::Separator();
+
+    float navWidth = 118.f * density;
+    float buttonHeight = 42.f * density;
+    ImGui::BeginChild("##left_nav", ImVec2(navWidth, 0.f), true);
+    ImGui::TextDisabled("CONTROL CENTER");
+    ImGui::Spacing();
+    navButton("HOME", 0, buttonHeight);
+    navButton("HUD", 1, buttonHeight);
+    navButton("STYLE", 2, buttonHeight);
+    navButton("MODULES", 3, buttonHeight);
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::TextDisabled("ACTIVE WHILE");
+    ImGui::TextWrapped("PUBG is foreground");
+    ImGui::Spacing();
+    ImGui::TextDisabled("Tap N bubble to close");
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+    ImGui::BeginChild("##content", ImVec2(0.f, 0.f), false);
+    if (selectedPage == 0) {
+        ImGui::TextColored(accents[accent], "SESSION DASHBOARD");
+        ImGui::Separator();
+        ImGui::TextWrapped("Premium native ImGui menu. Its bubble automatically appears when a supported PUBG game becomes foreground, and disappears after leaving the game.");
+        ImGui::Spacing();
+        ImGui::TextColored(ImVec4(.36f, .86f, .66f, 1.f), "CONNECTED: ANDROID OVERLAY");
+        ImGui::TextWrapped("Crosshair, visual FOV ring, clock, session timer and theme settings have real local effects.");
+        ImGui::Spacing();
+        ImGui::TextColored(ImVec4(1.f, .72f, .35f, 1.f), "GAME PATCHES NOT CONNECTED");
+        ImGui::TextWrapped("ESP, auto aim, recoil, skins and bypass from the old 4.5 code are NOT active in PUBG 4.7.");
+        ImGui::Spacing();
+        if ((overlayFlags.load() & 16) != 0) {
+            ImGui::Text("UI renderer: %.1f FPS", ImGui::GetIO().Framerate);
+        }
+    } else if (selectedPage == 1) {
+        ImGui::TextColored(accents[accent], "LIVE HUD CONTROLS");
+        ImGui::Separator();
+        ImGui::TextDisabled("These toggles change visible Android overlays.");
+        ImGui::Spacing();
+        menuToggle("Center crosshair", "Draw a non-interactive center sight.", 1);
+        menuToggle("FOV guide ring", "Visual guide only; no aim assistance.", 2);
+        menuToggle("Clock widget", "Show current device time during game.", 4);
+        menuToggle("Session timer", "Count current foreground game session.", 8);
+        ImGui::Separator();
+        if (ImGui::Button("DISABLE ALL HUD", ImVec2(-1.f, 38.f*density))) {
+            overlayFlags.fetch_and(~15);
+        }
+    } else if (selectedPage == 2) {
+        ImGui::TextColored(accents[accent], "APPEARANCE");
+        ImGui::Separator();
+        const float aw = std::max(40.f, (ImGui::GetContentRegionAvail().x - 12.f) / 2.f);
+        if (ImGui::Button("VIOLET", ImVec2(aw, 37.f*density))) accent = 0;
+        ImGui::SameLine();
+        if (ImGui::Button("CYAN", ImVec2(aw, 37.f*density))) accent = 1;
+        if (ImGui::Button("EMERALD", ImVec2(aw, 37.f*density))) accent = 2;
+        ImGui::SameLine();
+        if (ImGui::Button("AMBER", ImVec2(aw, 37.f*density))) accent = 3;
+        ImGui::Spacing();
+        ImGui::SliderFloat("Opacity", &panelOpacity, .72f, 1.f, "%.2f");
+        ImGui::SliderFloat("Corners", &borderRadius, 4.f, 24.f, "%.0f");
+        ImGui::SliderFloat("UI scale", &scale, .80f, 1.15f, "%.2f");
+        menuToggle("Compact layout", "Less spacing between controls.", 32);
+        menuToggle("Show UI frame rate", "Measures ImGui renderer, not PUBG FPS.", 16);
+        if (ImGui::Button("RESET STYLE", ImVec2(-1.f, 38.f*density))) {
+            accent = 0;
+            scale = 1.f;
+            panelOpacity = .96f;
+            borderRadius = 12.f;
+            overlayFlags.fetch_and(~32);
+        }
+    } else {
+        ImGui::TextColored(accents[accent], "GAME FEATURE STATUS");
+        ImGui::Separator();
+        ImGui::TextWrapped("Unverified legacy modules are shown as offline instead of switches that do nothing.");
+        moduleStatus("ESP / PLAYERS", "Needs current 4.7 SDK, tested actor data and render integration.");
+        moduleStatus("AIM / BULLET", "Not linked to PUBG 4.7; no game aim modification.");
+        moduleStatus("RECOIL / WEAPONS", "Original weapon offsets not verified for 4.7.");
+        moduleStatus("SKINS / VEHICLES", "No game runtime integration in this build.");
+        moduleStatus("ANTI-BAN / BYPASS", "Cannot promise any ban prevention or safety.");
+    }
+    ImGui::EndChild();
     ImGui::End();
 }
 }
@@ -160,6 +238,16 @@ Java_com_RIYAZSRC_NativePreviewActivity_nativeInit(JNIEnv *, jclass, jfloat devi
 extern "C" JNIEXPORT void JNICALL
 Java_com_RIYAZSRC_NativePreviewActivity_nativeSetOverlayMode(JNIEnv *, jclass, jboolean enabled) {
     overlayMode = enabled == JNI_TRUE;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_RIYAZSRC_NativePreviewActivity_nativeGetOverlayFlags(JNIEnv *, jclass) {
+    return (jint)overlayFlags.load();
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_RIYAZSRC_NativePreviewActivity_nativeSetOverlayFlags(JNIEnv *, jclass, jint newFlags) {
+    overlayFlags.store((int)newFlags & 63);
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -195,7 +283,7 @@ Java_com_RIYAZSRC_NativePreviewActivity_nativeRender(JNIEnv *, jclass) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
     applyTheme();
-    if (compact) {
+    if ((overlayFlags.load() & 32) != 0) {
         ImGui::GetStyle().ItemSpacing = ImVec2(5.f*density, 5.f*density);
     }
     renderMenu();
