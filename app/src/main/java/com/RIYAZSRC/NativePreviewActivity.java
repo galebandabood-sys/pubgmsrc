@@ -28,6 +28,8 @@ public final class NativePreviewActivity extends Activity {
     static native void nativeRender();
     static native void nativeShutdown();
     static native void nativeSetOverlayMode(boolean enabled);
+    static native int nativeGetOverlayFlags();
+    static native void nativeSetOverlayFlags(int flags);
 
     static boolean isLibraryAvailable() {
         return libraryAvailable;
