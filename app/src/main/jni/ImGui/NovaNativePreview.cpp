@@ -11,7 +11,7 @@
 
 namespace {
 bool ready = false;
-std::atomic<int> overlayFlags{16};
+std::atomic<int> overlayFlags{0};
 int selectedPage = 0;
 bool overlayMode = false;
 int widthPx = 1;
@@ -20,7 +20,6 @@ float density = 1.f;
 float touchX = -1.f;
 float touchY = -1.f;
 bool touching = false;
-bool showFps = true;
 bool compact = false;
 bool showSample = true;
 int page = 0;
@@ -122,9 +121,9 @@ void renderMenu() {
 
     ImGui::TextColored(accents[accent], "NOVA  PRIME");
     ImGui::SameLine();
-    ImGui::TextDisabled("  /  ARM64  /  5.0");
+    ImGui::TextDisabled("  /  ARM64  /  5.2");
     ImGui::TextColored(ImVec4(.35f, .85f, .70f, 1.f),
-            overlayMode ? "GAME SESSION MODE  -  READY" : "LOCAL UI PREVIEW");
+            overlayMode ? "MANUAL HUD OVERLAY" : "STANDALONE MENU PREVIEW");
     ImGui::Separator();
 
     float navWidth = 118.f * density;
@@ -138,8 +137,8 @@ void renderMenu() {
     navButton("MODULES", 3, buttonHeight);
     ImGui::Spacing();
     ImGui::Separator();
-    ImGui::TextDisabled("ACTIVE WHILE");
-    ImGui::TextWrapped("PUBG is foreground");
+    ImGui::TextDisabled("MANUAL MODE");
+    ImGui::TextWrapped("Stop with NOVA or notification");
     ImGui::Spacing();
     ImGui::TextDisabled("Tap N bubble to close");
     ImGui::EndChild();
@@ -147,19 +146,12 @@ void renderMenu() {
     ImGui::SameLine();
     ImGui::BeginChild("##content", ImVec2(0.f, 0.f), false);
     if (selectedPage == 0) {
-        ImGui::TextColored(accents[accent], "SESSION DASHBOARD");
+        ImGui::TextColored(accents[accent], "NOVA MANUAL MENU");
         ImGui::Separator();
-        ImGui::TextWrapped("Premium native ImGui menu. Its bubble automatically appears when a supported PUBG game becomes foreground, and disappears after leaving the game.");
+        ImGui::TextWrapped("Manual display only. No gameplay modifications or unverified features are enabled.");
         ImGui::Spacing();
-        ImGui::TextColored(ImVec4(.36f, .86f, .66f, 1.f), "CONNECTED: ANDROID OVERLAY");
-        ImGui::TextWrapped("Crosshair, visual FOV ring, clock, session timer and theme settings have real local effects.");
-        ImGui::Spacing();
-        ImGui::TextColored(ImVec4(1.f, .72f, .35f, 1.f), "GAME PATCHES NOT CONNECTED");
-        ImGui::TextWrapped("ESP, auto aim, recoil, skins and bypass from the old 4.5 code are NOT active in PUBG 4.7.");
-        ImGui::Spacing();
-        if ((overlayFlags.load() & 16) != 0) {
-            ImGui::Text("UI renderer: %.1f FPS", ImGui::GetIO().Framerate);
-        }
+        ImGui::TextColored(ImVec4(1.f, .72f, .35f, 1.f), "PUBG 4.7 GAME FEATURES NOT CONNECTED");
+        ImGui::TextWrapped("Old ESP, aim and weapon modules use unverified offsets and are not active.");
     } else if (selectedPage == 1) {
         ImGui::TextColored(accents[accent], "LIVE HUD CONTROLS");
         ImGui::Separator();
@@ -167,11 +159,9 @@ void renderMenu() {
         ImGui::Spacing();
         menuToggle("Center crosshair", "Draw a non-interactive center sight.", 1);
         menuToggle("FOV guide ring", "Visual guide only; no aim assistance.", 2);
-        menuToggle("Clock widget", "Show current device time during game.", 4);
-        menuToggle("Session timer", "Count current foreground game session.", 8);
         ImGui::Separator();
         if (ImGui::Button("DISABLE ALL HUD", ImVec2(-1.f, 38.f*density))) {
-            overlayFlags.fetch_and(~15);
+            overlayFlags.fetch_and(~3);
         }
     } else if (selectedPage == 2) {
         ImGui::TextColored(accents[accent], "APPEARANCE");
@@ -188,7 +178,6 @@ void renderMenu() {
         ImGui::SliderFloat("Corners", &borderRadius, 4.f, 24.f, "%.0f");
         ImGui::SliderFloat("UI scale", &scale, .80f, 1.15f, "%.2f");
         menuToggle("Compact layout", "Less spacing between controls.", 32);
-        menuToggle("Show UI frame rate", "Measures ImGui renderer, not PUBG FPS.", 16);
         if (ImGui::Button("RESET STYLE", ImVec2(-1.f, 38.f*density))) {
             accent = 0;
             scale = 1.f;
@@ -247,7 +236,7 @@ Java_com_RIYAZSRC_NativePreviewActivity_nativeGetOverlayFlags(JNIEnv *, jclass) 
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_RIYAZSRC_NativePreviewActivity_nativeSetOverlayFlags(JNIEnv *, jclass, jint newFlags) {
-    overlayFlags.store((int)newFlags & 63);
+    overlayFlags.store((int)newFlags & 35);
 }
 
 extern "C" JNIEXPORT void JNICALL
