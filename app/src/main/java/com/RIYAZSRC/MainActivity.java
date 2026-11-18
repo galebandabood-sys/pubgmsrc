@@ -139,7 +139,7 @@ public final class MainActivity extends Activity {
         brand.setTextDirection(View.TEXT_DIRECTION_LTR);
         brand.setGravity(Gravity.CENTER);
         content.addView(brand);
-        TextView subtitle = label("GAME-AWARE NATIVE CONTROL CENTER   •   5.0",
+        TextView subtitle = label("GAME-AWARE NATIVE CONTROL CENTER   •   5.1 / PUBG 4.7",
                 12, 0xffb99bea, false);
         subtitle.setTextDirection(View.TEXT_DIRECTION_LTR);
         subtitle.setGravity(Gravity.CENTER);
@@ -149,8 +149,8 @@ public final class MainActivity extends Activity {
 
         LinearLayout hero = card();
         addText(hero, "إصدار المطوّر  /  ARM64", 13, 0xffc9b3f3, false, 0);
-        addText(hero, "المكتبة المحلية", 23, WHITE, true, 6);
-        addText(hero, "مكتبة C++ الأصلية مع Dear ImGui؛ الملفات موجودة داخل الـAPK، بدون حقن أو تغيير ملفات اللعبة.",
+        addText(hero, "مكتبة العرض التجريبية", 23, WHITE, true, 6);
+        addText(hero, "منيو Dear ImGui حقيقي للعرض فوق اللعبة؛ المكتبة القديمة موجودة للتشخيص فقط وغير محقونة في PUBG.",
                 14, MUTED, false, 13);
         LinearLayout fileChip = new LinearLayout(this);
         fileChip.setPadding(dp(13), dp(14), dp(13), dp(14));
@@ -160,12 +160,16 @@ public final class MainActivity extends Activity {
                 new LinearLayout.LayoutParams(-1, -2);
         fileParams.topMargin = dp(16);
         hero.addView(fileChip, fileParams);
-        addText(fileChip, "libItsMyHubS.so  •  arm64-v8a", 16, WHITE, true, 0);
+        addText(fileChip, "libnova_preview.so  •  arm64-v8a", 16, WHITE, true, 0);
         libraryStatus = label("فحص مكتبة C++...", 13, MUTED, false);
         fileChip.addView(libraryStatus);
         Button checkLibrary = secondaryButton("فحص المكتبة داخل التطبيق");
         addButton(hero, checkLibrary, 15);
         checkLibrary.setOnClickListener(v -> updateLibraryStatus());
+        Button preview = secondaryButton("تجربة المنيو بدون فتح PUBG");
+        addButton(hero, preview, 10);
+        preview.setOnClickListener(v -> startActivity(
+                new Intent(this, NativePreviewActivity.class)));
 
         LinearLayout monitor = card();
         addText(monitor, "منيو ذكي خاص باللعبة", 22, WHITE, true, 0);
@@ -257,13 +261,24 @@ public final class MainActivity extends Activity {
         addText(labels, pkg, 12, MUTED, false, 4);
 
         String version = "غير مثبتة";
+        String buildNote = "ملفات اللعبة غير مفحوصة";
         if (installed) {
             try {
                 PackageInfo info = getPackageManager().getPackageInfo(pkg, 0);
-                version = "إصدار اللعبة: " + info.versionName;
-            } catch (PackageManager.NameNotFoundException ignored) { }
+                version = "إصدار اللعبة: " + info.versionName +
+                        "  |  البناء: " + info.versionCode;
+                if ("com.tencent.ig".equals(pkg) &&
+                        "4.7.0".equals(info.versionName) && info.versionCode == 21740) {
+                    buildNote = "مطابقة رقم النسخة المفحوصة من جهازك • واجهة HUD فقط، لا يعني توافق إزاحات الذاكرة.";
+                } else {
+                    buildNote = "الإصدار مختلف عن النسخة 4.7.0 (21740) المسجلة؛ المنيو المرئي فقط.";
+                }
+            } catch (PackageManager.NameNotFoundException ignored) {
+                buildNote = "تعذّر قراءة رقم البناء";
+            }
         }
         addText(card, version, 14, installed ? 0xffc4a7ff : MUTED, false, 12);
+        if (installed) addText(card, buildNote, 12, MUTED, false, 6);
         Button launch = installed ? primaryButton("تهيئة و تشغيل اللعبة")
                 : secondaryButton("اللعبة غير مثبتة");
         launch.setEnabled(installed);
@@ -338,13 +353,14 @@ public final class MainActivity extends Activity {
         try (ZipFile z = new ZipFile(getApplicationInfo().sourceDir)) {
             ZipEntry nativeLib = z.getEntry("lib/arm64-v8a/libItsMyHubS.so");
             ZipEntry renderer = z.getEntry("lib/arm64-v8a/libnova_preview.so");
-            if (nativeLib != null && renderer != null) {
-                double size = nativeLib.getSize() / (1024.0 * 1024.0);
+            if (renderer != null) {
+                double size = renderer.getSize() / (1024.0 * 1024.0);
                 libraryStatus.setText(String.format(Locale.US,
-                        "● جاهز • %.1f MB  |  ImGui مدمج", size));
+                        "● منيو ImGui مدمج • %.1f MB | المكتبة القديمة: %s (غير مفعلة)",
+                        size, nativeLib != null ? "موجودة" : "غير موجودة"));
                 libraryStatus.setTextColor(0xff63dfb4);
             } else {
-                libraryStatus.setText("المكتبة أو محرك المنيو ناقص");
+                libraryStatus.setText("ملف عرض المنيو ImGui ناقص");
                 libraryStatus.setTextColor(0xffffbb91);
             }
         } catch (IOException failure) {
