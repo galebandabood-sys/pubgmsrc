@@ -115,7 +115,7 @@ public final class NativeOverlayService extends Service {
             return;
         }
         windows = (WindowManager) getSystemService(WINDOW_SERVICE);
-        flags = getSharedPreferences(PREFS, MODE_PRIVATE).getInt("hud_flags", 16);
+        flags = getSharedPreferences(PREFS, MODE_PRIVATE).getInt("hud_flags", 0) & 35;
         // Manual opt-in: show the bubble immediately, without reading usage events.
         // The bubble remains visible until the user stops it in NOVA/notification.
         setGameActive(true);
@@ -285,7 +285,7 @@ public final class NativeOverlayService extends Service {
 
     private void syncNativeFlags() {
         if (!panelShown || !rendererReady) return;
-        int updated = NativePreviewActivity.nativeGetOverlayFlags();
+        int updated = NativePreviewActivity.nativeGetOverlayFlags() & 35;
         if (updated == flags) return;
         flags = updated;
         getSharedPreferences(PREFS, MODE_PRIVATE).edit()
