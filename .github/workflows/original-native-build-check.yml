@@ -32,6 +32,20 @@ jobs:
       - name: Checkout original repository
         uses: actions/checkout@v4
 
+      - name: Audit 4.7 SDK provenance (must never imply feature support)
+        run: |
+          python3 tools/check_sdk_47_provenance.py > sdk47-provenance.json
+          python3 - <<'PY'
+          import json
+          data = json.load(open("sdk47-provenance.json", encoding="utf-8"))
+          assert data["sdk_4_7_compatible"] is False
+          assert data["esp_4_7_verified"] is False
+          assert data["aimbot_4_7_verified"] is False
+          print("PUBG 4.7 SDK STATUS: NOT VERIFIED")
+          for path, result in data["source_files"].items():
+              print(path, result["status"])
+          PY
+
       - name: Java 17 for Android command-line SDK tools
         uses: actions/setup-java@v4
         with:
