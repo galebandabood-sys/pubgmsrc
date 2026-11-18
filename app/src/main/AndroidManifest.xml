@@ -5,7 +5,6 @@
     <!-- Android window overlay explicitly granted by the user. No game-data access, root or VPN. -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"/>
     <queries>
         <package android:name="com.tencent.ig"/>
         <package android:name="com.pubg.imobile"/>
