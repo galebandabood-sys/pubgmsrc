@@ -6,12 +6,18 @@ on:
       - "tools/sdk_compat_audit.py"
       - "tests/test_sdk_compat_audit.py"
       - "app/src/main/jni/Offset.h"
+      - "tools/verify_pubg_split.py"
+      - "tests/test_verify_pubg_split.py"
+      - "evidence/**"
       - ".github/workflows/sdk-compat-audit.yml"
   pull_request:
     paths:
       - "tools/sdk_compat_audit.py"
       - "tests/test_sdk_compat_audit.py"
       - "app/src/main/jni/Offset.h"
+      - "tools/verify_pubg_split.py"
+      - "tests/test_verify_pubg_split.py"
+      - "evidence/**"
       - ".github/workflows/sdk-compat-audit.yml"
   workflow_dispatch:
 
@@ -25,6 +31,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run 9 SDK provenance tests
         run: python3 -m unittest discover -s tests -p 'test_sdk_compat_audit.py' -v
+      - name: Run 6 read-only APK/library identity tests
+        run: python3 -m unittest discover -s tests -p 'test_verify_pubg_split.py' -v
       - name: Report unverified PUBG 4.7 compatibility without exact ELF and SDK profile
         run: |
           set +e
