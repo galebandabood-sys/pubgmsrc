@@ -14,6 +14,13 @@
   "notes": [
     "Recorded for matching an exact game binary in future compatibility checks.",
     "No libUE4.so binary was uploaded and no SDK offsets were validated.",
-    "This is not a compatible SDK profile, a root/kernel-driver compatibility guarantee, or evidence that ESP/aimbot functions work."
-  ]
+    "This is not a compatible SDK profile, a root/kernel-driver compatibility guarantee, or evidence that ESP/aimbot functions work.",
+    "SHA-256 identity independently reproduced by user's on-device Python hash of extracted bundle; binary ABI/SDK offsets/features remain unverified."
+  ],
+  "reproduction": {
+    "observation_date": "2026-11-18",
+    "method": "User ran Python 3.14.10 and streamed lib/arm64-v8a/libUE4.so from split_config.arm64_v8a.apk within PUBG MOBILE_4.7.0.apks; reported SHA256 and MATCH on screen",
+    "result": "SHA256_MATCH_REPRODUCED",
+    "note": "Evidence comes from user's device screenshot; game archive and binary were not uploaded to this repository."
+  }
 }
