@@ -1,0 +1,32 @@
+{
+  "record_type": "user_observed_libue4_fingerprint",
+  "observation_date": "2026-11-18",
+  "package": "com.tencent.ig",
+  "game_version": "4.7.0",
+  "version_code": 21740,
+  "abi": "arm64-v8a",
+  "library": "lib/arm64-v8a/libUE4.so",
+  "uncompressed_bytes": 258830456,
+  "crc32": "7c34f3f2",
+  "sha256": "9e5b96f709d38a2eaf7f186487fb8e2430e45593b7e33d7d5fd51eca83d78e3a",
+  "observed_from": "MT Manager checksum dialog of installed PUBG Mobile 4.7.0 split_config.arm64_v8a.apk; values copied by user",
+  "status": "FINGERPRINT_ONLY_UNVERIFIED",
+  "notes": [
+    "Recorded for matching an exact game binary in future compatibility checks.",
+    "No libUE4.so binary was uploaded and no SDK offsets were validated.",
+    "This is not a compatible SDK profile, a root/kernel-driver compatibility guarantee, or evidence that ESP/aimbot functions work.",
+    "SHA-256 identity independently reproduced by user's on-device Python hash of extracted bundle; binary ABI/SDK offsets/features remain unverified.",
+    "User independently confirmed ELF header architecture matches AArch64. This only validates ELF identity, not runtime feature compatibility."
+  ],
+  "reproduction": {
+    "observation_date": "2026-11-18",
+    "method": "User ran Python 3.14.10 and streamed lib/arm64-v8a/libUE4.so from split_config.arm64_v8a.apk within PUBG MOBILE_4.7.0.apks; reported SHA256 and MATCH on screen",
+    "result": "SHA256_MATCH_REPRODUCED",
+    "note": "Evidence comes from user's device screenshot; game archive and binary were not uploaded to this repository.",
+    "elf_header_check": {
+      "result": "PASS",
+      "method": "User ran Python reading first 20 bytes of libUE4.so from arm64 split within exported .apks; header starts ELF, class=2, data=1, e_machine=183",
+      "observed_from": "2026-11-18 user-provided Termux screenshot"
+    }
+  }
+}

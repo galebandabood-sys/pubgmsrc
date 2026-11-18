@@ -3,6 +3,7 @@ static int prevXSuits = 0;
 // SKIN DUMP
 #include "Data.h"
 #include "Draw.h"
+#include "ESPFilterLogic.h"
 bool isAimingAtMe;
 bool KfoxMagic;
 bool FixJump;
@@ -133,7 +134,7 @@ DrawCenteredLines(ImGui::GetFont(), 23.0f, infoLines, lineColors,
     //if (iLogin){
     auto Actors = GetNecessaryActors();
     for (auto Actor : Actors) {
-    if (!Actor && isObjectInvalid(Actor)) continue;
+    if (!Actor || isObjectInvalid(Actor)) continue;
     if (Data::localPlayer && Data::localController) {
     if (DeveloperMode && Actor->IsA(AActor::StaticClass()))  {
         DevMode(static_cast<AActor *>(Actor));
@@ -383,7 +384,7 @@ PATCH_LIB("libgcloud.so", 0x31EAF4, "00 00 00 B5");
                                 totalEnemies++;
                                 if(Player->GetName() == "ModelTarget")
                                 continue;
-                            if (Config.ESPMenu.NoBot && Player->bEnsure || Player->bIsAI)
+                            if (ESPFilterLogic::ShouldHideBot(Config.ESPMenu.NoBot, Player->bEnsure, Player->bIsAI))
                                     continue;
                             if (Config.Alert)
                             {
@@ -706,7 +707,7 @@ PATCH_LIB("libgcloud.so", 0x31EAF4, "00 00 00 B5");
                                     float health = Player->Health;
                                     char botName[20];
                                     sprintf(botName, Config.language ? "Máy" : "Ai");
-                                    if (Config.ESPMenu.Country && !Player->bEnsure || !Player->bIsAI) {
+                                    if (ESPFilterLogic::ShouldShowNation(Config.ESPMenu.Country, Player->bEnsure, Player->bIsAI)) {
                                     wstring nation = Player->Nation.ToWString();
                                     swprintf(temp, sizeof(temp) / sizeof(wchar_t), L"%ls - %ls", playerName.c_str(), nation.c_str());
                                     } else {
