@@ -1,0 +1,19 @@
+{
+  "record_type": "user_observed_libue4_fingerprint",
+  "observation_date": "2026-11-18",
+  "package": "com.tencent.ig",
+  "game_version": "4.7.0",
+  "version_code": 21740,
+  "abi": "arm64-v8a",
+  "library": "lib/arm64-v8a/libUE4.so",
+  "uncompressed_bytes": 258830456,
+  "crc32": "7c34f3f2",
+  "sha256": "9e5b96f709d38a2eaf7f186487fb8e2430e45593b7e33d7d5fd51eca83d78e3a",
+  "observed_from": "MT Manager checksum dialog of installed PUBG Mobile 4.7.0 split_config.arm64_v8a.apk; values copied by user",
+  "status": "FINGERPRINT_ONLY_UNVERIFIED",
+  "notes": [
+    "Recorded for matching an exact game binary in future compatibility checks.",
+    "No libUE4.so binary was uploaded and no SDK offsets were validated.",
+    "This is not a compatible SDK profile, a root/kernel-driver compatibility guarantee, or evidence that ESP/aimbot functions work."
+  ]
+}
