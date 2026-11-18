@@ -7,8 +7,8 @@ android {
         applicationId "com.power.admin"
         minSdkVersion 29
         targetSdkVersion 31
-        versionCode 6
-        versionName "5.1.0-pubg47-hud-test"
+        versionCode 7
+        versionName "5.2.0-manual-hud-no-usage"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters "arm64-v8a"
