@@ -15,7 +15,6 @@ import android.opengl.GLSurfaceView;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -23,9 +22,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -46,7 +42,6 @@ public final class NativeOverlayService extends Service {
             if (gameActive) {
                 try {
                     syncNativeFlags();
-                    updateInformation();
                 } catch (RuntimeException failure) {
                     setGameActive(false);
                     stopSelf();
@@ -61,11 +56,9 @@ public final class NativeOverlayService extends Service {
     private WindowManager.LayoutParams bubbleParams;
     private GLSurfaceView panel;
     private View reticle;
-    private TextView information;
     private boolean panelShown;
     private boolean gameActive;
     private volatile boolean rendererReady;
-    private long enteredAt;
     private int flags;
 
     private int dp(float n) {
@@ -138,7 +131,6 @@ public final class NativeOverlayService extends Service {
         if (foreground == gameActive) return;
         gameActive = foreground;
         if (foreground) {
-            enteredAt = SystemClock.elapsedRealtime();
             try {
                 createBubble();
                 applyHudFlags();
@@ -149,7 +141,6 @@ public final class NativeOverlayService extends Service {
         } else {
             hidePanel();
             removeReticle();
-            removeInformation();
             removeBubble();
         }
     }
@@ -353,49 +344,6 @@ public final class NativeOverlayService extends Service {
         }
         if (reticle != null) reticle.invalidate();
 
-        boolean showInfo = (flags & 12) != 0;
-        if (showInfo && information == null) {
-            TextView view = new TextView(this);
-            view.setTextColor(0xffffffff);
-            view.setTextSize(14);
-            view.setPadding(dp(11), dp(7), dp(11), dp(7));
-            view.setBackground(roundBackground(0xcc1d1634, 14, 0xff7555ba));
-            WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                    PixelFormat.TRANSLUCENT);
-            params.gravity = Gravity.RIGHT | Gravity.TOP;
-            params.x = dp(15);
-            params.y = dp(42);
-            params.alpha = .76f;
-            try {
-                windows.addView(view, params);
-                information = view;
-            } catch (RuntimeException ignored) { }
-        } else if (!showInfo) {
-            removeInformation();
-        }
-        updateInformation();
-    }
-
-    private void updateInformation() {
-        if (information == null) return;
-        StringBuilder value = new StringBuilder();
-        if ((flags & 4) != 0) {
-            value.append(new SimpleDateFormat("HH:mm", Locale.getDefault())
-                    .format(new Date()));
-        }
-        if ((flags & 8) != 0) {
-            long elapsed = Math.max(0L,
-                    (SystemClock.elapsedRealtime() - enteredAt) / 1000L);
-            if (value.length() != 0) value.append("  |  ");
-            value.append(String.format(Locale.US, "%02d:%02d", elapsed / 60L,
-                    elapsed % 60L));
-        }
-        information.setText(value);
     }
 
     private void removeReticle() {
@@ -405,19 +353,11 @@ public final class NativeOverlayService extends Service {
         reticle = null;
     }
 
-    private void removeInformation() {
-        if (information != null && windows != null) {
-            try { windows.removeView(information); } catch (RuntimeException ignored) { }
-        }
-        information = null;
-    }
-
     @Override public void onDestroy() {
         handler.removeCallbacks(watch);
         setGameActive(false);
         hidePanel();
         removeReticle();
-        removeInformation();
         removeBubble();
         stopForeground(true);
         super.onDestroy();
