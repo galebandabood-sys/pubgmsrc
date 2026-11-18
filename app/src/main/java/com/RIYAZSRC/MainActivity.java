@@ -208,10 +208,10 @@ public final class MainActivity extends Activity {
 
         LinearLayout available = card();
         addText(available, "الميزات المرتبطة بالمنيو", 18, WHITE, true, 0);
-        addText(available, "تشتغل فعلياً: علامة التصويب المرئية، دائرة إرشادية، ساعة، مؤقت جلسة، ألوان المنيو، شفافيته وحجمه.",
+        addText(available, "المتوفر حالياً: علامة مرئية ثابتة، دائرة إرشادية، وإعدادات شكل المنيو فقط. أزلنا الساعة والمؤقت وعداد FPS.",
                 14, 0xff8ce6bf, false, 12);
         addText(available,
-                "غير متوفرة لهذه النسخة: ESP، Aimbot، No Recoil، Magic Bullet، تغيير السكنات وتجاوز الحظر. المصدر القديم ما ثبت توافقه مع 4.7.",
+                "ESP والإيم وNo Recoil وMagic Bullet غير مفعّلة، لأن إزاحات SDK القديم غير متحققة لببجي 4.7. لن نعرضها كمفاتيح فعّالة وهمية.",
                 13, 0xffffc88b, false, 12);
         addText(available, "لا روت ولا وصول الاستخدام ولا OBB. بعد خروجك من اللعبة، أوقف الفقاعة من الإشعار أو NOVA.", 12, MUTED, false, 12);
         updateLibraryStatus();
