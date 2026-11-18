@@ -1,0 +1,29 @@
+name: Native ESP pure-logic tests
+
+on:
+  push:
+    paths:
+      - 'app/src/main/jni/WOLTAJ/Main/ESP/ESPFilterLogic.h'
+      - 'app/src/main/jni/WOLTAJ/Main/ESP/Draw.cpp'
+      - 'tests/test_esp_filters.cpp'
+      - '.github/workflows/native-esp-logic-check.yml'
+  pull_request:
+    paths:
+      - 'app/src/main/jni/WOLTAJ/Main/ESP/ESPFilterLogic.h'
+      - 'app/src/main/jni/WOLTAJ/Main/ESP/Draw.cpp'
+      - 'tests/test_esp_filters.cpp'
+      - '.github/workflows/native-esp-logic-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-filter-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and run ESP filter tests
+        run: |
+          g++ -std=c++17 -Wall -Wextra -Werror tests/test_esp_filters.cpp -o /tmp/test_esp_filters
+          /tmp/test_esp_filters
