@@ -29,7 +29,7 @@ import java.util.Locale;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-/** Opt-in game-aware overlay. No memory access, injection or anti-cheat bypass. */
+/** Opt-in manual Android overlay. Requires draw-over-apps permission only. */
 public final class NativeOverlayService extends Service {
     public static final String ACTION_STOP = "com.RIYAZSRC.STOP_NATIVE_OVERLAY";
     private static final String CHANNEL = "nova_prime_session";
@@ -38,26 +38,25 @@ public final class NativeOverlayService extends Service {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable watch = new Runnable() {
         @Override public void run() {
-            if (!Settings.canDrawOverlays(NativeOverlayService.this) ||
-                    !GameRuntime.hasUsageAccess(NativeOverlayService.this)) {
+            if (!Settings.canDrawOverlays(NativeOverlayService.this)) {
                 setGameActive(false);
                 stopSelf();
                 return;
             }
-            try {
-                setGameActive(observer != null && observer.gameInForeground());
-                if (gameActive) {
+            if (gameActive) {
+                try {
                     syncNativeFlags();
                     updateInformation();
+                } catch (RuntimeException failure) {
+                    setGameActive(false);
+                    stopSelf();
+                    return;
                 }
-            } catch (RuntimeException failure) {
-                setGameActive(false);
             }
             handler.postDelayed(this, 1100L);
         }
     };
     private WindowManager windows;
-    private GameRuntime.Observer observer;
     private TextView bubble;
     private WindowManager.LayoutParams bubbleParams;
     private GLSurfaceView panel;
@@ -85,7 +84,7 @@ public final class NativeOverlayService extends Service {
         NotificationManager manager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         manager.createNotificationChannel(new NotificationChannel(CHANNEL,
-                "NOVA - PUBG session", NotificationManager.IMPORTANCE_LOW));
+                "NOVA - manual overlay", NotificationManager.IMPORTANCE_LOW));
         int bits = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
         PendingIntent open = PendingIntent.getActivity(this, 0,
                 new Intent(this, MainActivity.class), bits);
@@ -93,8 +92,8 @@ public final class NativeOverlayService extends Service {
                 new Intent(this, NativeOverlayService.class).setAction(ACTION_STOP), bits);
         return new Notification.Builder(this, CHANNEL)
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
-                .setContentTitle("NOVA PRIME / Game-aware menu")
-                .setContentText("يراقب دخول ببجي بإذنك — المنيو يظهر داخل اللعبة فقط")
+                .setContentTitle("NOVA PRIME / Manual HUD")
+                .setContentText("المنيو اليدوي شغال؛ اضغط إيقاف حتى تخفيه")
                 .setContentIntent(open)
                 .setOngoing(true)
                 .addAction(android.R.drawable.ic_menu_close_clear_cancel, "إيقاف", stop)
@@ -104,8 +103,8 @@ public final class NativeOverlayService extends Service {
     @Override public void onCreate() {
         super.onCreate();
         startForeground(NOTIFICATION_ID, notification());
-        if (!Settings.canDrawOverlays(this) || !GameRuntime.hasUsageAccess(this)) {
-            Toast.makeText(this, "فعّل إذن الظهور وإذن الاستخدام من NOVA",
+        if (!Settings.canDrawOverlays(this)) {
+            Toast.makeText(this, "فعّل إذن الظهور فوق التطبيقات من NOVA",
                     Toast.LENGTH_LONG).show();
             stopSelf();
             return;
@@ -116,9 +115,11 @@ public final class NativeOverlayService extends Service {
             return;
         }
         windows = (WindowManager) getSystemService(WINDOW_SERVICE);
-        observer = new GameRuntime.Observer(this);
         flags = getSharedPreferences(PREFS, MODE_PRIVATE).getInt("hud_flags", 16);
-        handler.post(watch);  // No bubble until a supported PUBG app is foreground.
+        // Manual opt-in: show the bubble immediately, without reading usage events.
+        // The bubble remains visible until the user stops it in NOVA/notification.
+        setGameActive(true);
+        handler.post(watch);
     }
 
     @Override public int onStartCommand(Intent intent, int startupFlags, int id) {
@@ -126,7 +127,7 @@ public final class NativeOverlayService extends Service {
             stopSelf();
             return START_NOT_STICKY;
         }
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     @Override public IBinder onBind(Intent intent) {
@@ -141,8 +142,7 @@ public final class NativeOverlayService extends Service {
             try {
                 createBubble();
                 applyHudFlags();
-                if (getSharedPreferences(PREFS, MODE_PRIVATE)
-                        .getBoolean("auto_open", false)) showPanel();
+                // The floating control panel opens only when the user taps N.
             } catch (RuntimeException failed) {
                 setGameActive(false);
             }
