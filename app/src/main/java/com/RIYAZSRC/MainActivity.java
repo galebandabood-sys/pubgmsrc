@@ -17,7 +17,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.IOException;
@@ -139,7 +138,7 @@ public final class MainActivity extends Activity {
         brand.setTextDirection(View.TEXT_DIRECTION_LTR);
         brand.setGravity(Gravity.CENTER);
         content.addView(brand);
-        TextView subtitle = label("GAME-AWARE NATIVE CONTROL CENTER   •   5.1 / PUBG 4.7",
+        TextView subtitle = label("MANUAL OVERLAY HUD   •   5.2 / PUBG 4.7",
                 12, 0xffb99bea, false);
         subtitle.setTextDirection(View.TEXT_DIRECTION_LTR);
         subtitle.setGravity(Gravity.CENTER);
@@ -171,49 +170,33 @@ public final class MainActivity extends Activity {
         preview.setOnClickListener(v -> startActivity(
                 new Intent(this, NativePreviewActivity.class)));
 
+
         LinearLayout monitor = card();
-        addText(monitor, "منيو ذكي خاص باللعبة", 22, WHITE, true, 0);
+        addText(monitor, "المنيو اليدوي بدون وصول الاستخدام", 22, WHITE, true, 0);
         addText(monitor,
-                "الفقاعة تظهر لما تدخل ببجي وتختفي تلقائياً لما تطلع منها. خدمة المراقبة تبقى بالإشعار لحين توقفها.",
+                "ما يحتاج إذن مراقبة التطبيقات ولا نسخ OBB. لتظهر فقاعة N فوق PUBG لازم فقط إذن الظهور فوق التطبيقات. الفقاعة تبقى ظاهرة إلى أن توقفها يدوياً.",
                 14, MUTED, false, 10);
-        monitorStatus = label("جاري التأكد من الأذونات...", 14, 0xffdcc7ff, true);
+        monitorStatus = label("جاري فحص إذن الظهور...", 14, 0xffdcc7ff, true);
         LinearLayout.LayoutParams statusParams =
                 new LinearLayout.LayoutParams(-1, -2);
         statusParams.topMargin = dp(12);
         monitor.addView(monitorStatus, statusParams);
-        Button overlayGrant = secondaryButton("1  •  إذن الظهور فوق التطبيقات");
+        Button overlayGrant = secondaryButton("1  •  إذن الظهور فوق التطبيقات فقط");
         addButton(monitor, overlayGrant, 14);
         overlayGrant.setOnClickListener(v -> requestOverlayPermission());
-        Button usageGrant = secondaryButton("2  •  إذن معرفة اللعبة المفتوحة");
-        addButton(monitor, usageGrant, 8);
-        usageGrant.setOnClickListener(v -> requestUsagePermission());
 
-        Switch automatic = new Switch(this);
-        automatic.setText("فتح لوحة المنيو تلقائياً عند دخول اللعبة");
-        automatic.setTextSize(14);
-        automatic.setTextColor(WHITE);
-        automatic.setChecked(getSharedPreferences(PREFS, MODE_PRIVATE)
-                .getBoolean("auto_open", false));
-        automatic.setOnCheckedChangeListener((buttonView, checked) ->
-                getSharedPreferences(PREFS, MODE_PRIVATE).edit()
-                    .putBoolean("auto_open", checked).apply());
-        LinearLayout.LayoutParams switchParams =
-                new LinearLayout.LayoutParams(-1, -2);
-        switchParams.topMargin = dp(18);
-        monitor.addView(automatic, switchParams);
-
-        Button prepare = primaryButton("تهيئة المنيو ومراقبة الدخول");
+        Button prepare = primaryButton("2  •  تشغيل فقاعة N يدوياً");
         addButton(monitor, prepare, 16);
         prepare.setOnClickListener(v -> startMonitoring());
-        Button stop = secondaryButton("إيقاف المراقبة وإخفاء المنيو");
+        Button stop = secondaryButton("إيقاف الفقاعة وإخفاء المنيو");
         addButton(monitor, stop, 10);
         stop.setOnClickListener(v -> {
             boolean stopped = stopService(new Intent(this, NativeOverlayService.class));
-            Toast.makeText(this, stopped ? "انتهت المراقبة والمنيو مخفي" :
-                    "المراقبة متوقفة", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, stopped ? "تم إيقاف الفقاعة والمنيو" :
+                    "الفقاعة متوقفة", Toast.LENGTH_SHORT).show();
         });
 
-        addText(content, "الألعاب المدعومة", 23, WHITE, true, 7);
+        addText(content, "الألعاب المتاحة للفتح", 23, WHITE, true, 7);
         addText(content, "الإصدارات المعروضة مأخوذة من الألعاب المثبّتة على جهازك.",
                 13, MUTED, false, 6);
         int index = 0;
@@ -230,7 +213,7 @@ public final class MainActivity extends Activity {
         addText(available,
                 "غير متوفرة لهذه النسخة: ESP، Aimbot، No Recoil، Magic Bullet، تغيير السكنات وتجاوز الحظر. المصدر القديم ما ثبت توافقه مع 4.7.",
                 13, 0xffffc88b, false, 12);
-        addText(available, "لا نطلب روت ولا نغيّر بيانات PUBG.", 12, MUTED, false, 12);
+        addText(available, "لا روت ولا وصول الاستخدام ولا OBB. بعد خروجك من اللعبة، أوقف الفقاعة من الإشعار أو NOVA.", 12, MUTED, false, 12);
         updateLibraryStatus();
         updateMonitorStatus();
     }
@@ -279,7 +262,7 @@ public final class MainActivity extends Activity {
         }
         addText(card, version, 14, installed ? 0xffc4a7ff : MUTED, false, 12);
         if (installed) addText(card, buildNote, 12, MUTED, false, 6);
-        Button launch = installed ? primaryButton("تهيئة و تشغيل اللعبة")
+        Button launch = installed ? primaryButton("تشغيل الفقاعة وفتح اللعبة")
                 : secondaryButton("اللعبة غير مثبتة");
         launch.setEnabled(installed);
         addButton(card, launch, 15);
@@ -303,15 +286,11 @@ public final class MainActivity extends Activity {
             requestOverlayPermission();
             return false;
         }
-        if (!GameRuntime.hasUsageAccess(this)) {
-            requestUsagePermission();
-            return false;
-        }
         try {
             Intent intent = new Intent(this, NativeOverlayService.class);
             if (Build.VERSION.SDK_INT >= 26) startForegroundService(intent);
             else startService(intent);
-            Toast.makeText(this, "المنيو جاهز — تظهر فقاعة N داخل اللعبة فقط",
+            Toast.makeText(this, "الفقاعة N شغالة يدوياً — أوقفها بعد اللعب",
                     Toast.LENGTH_LONG).show();
             return true;
         } catch (RuntimeException error) {
@@ -331,19 +310,6 @@ public final class MainActivity extends Activity {
                     Uri.parse("package:" + getPackageName())));
         } catch (RuntimeException error) {
             Toast.makeText(this, "افتح إعدادات التطبيقات وفعّل الظهور فوق التطبيقات",
-                    Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private void requestUsagePermission() {
-        if (GameRuntime.hasUsageAccess(this)) {
-            Toast.makeText(this, "إذن بيانات الاستخدام مفعّل", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        try {
-            startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
-        } catch (RuntimeException error) {
-            Toast.makeText(this, "فعّل وصول الاستخدام من إعدادات أندرويد",
                     Toast.LENGTH_LONG).show();
         }
     }
@@ -369,17 +335,14 @@ public final class MainActivity extends Activity {
         }
     }
 
+
     private void updateMonitorStatus() {
         if (monitorStatus == null) return;
-        boolean overlay = Settings.canDrawOverlays(this);
-        boolean usage = GameRuntime.hasUsageAccess(this);
-        if (overlay && usage) {
-            monitorStatus.setText("● جاهز للمراقبة • الإذنان مفعّلان");
+        if (Settings.canDrawOverlays(this)) {
+            monitorStatus.setText("● إذن الظهور مفعّل • جاهز لتشغيل الفقاعة يدوياً");
             monitorStatus.setTextColor(0xff63dfb4);
         } else {
-            monitorStatus.setText("● يحتاج إعداد: " +
-                    (!overlay ? "إذن الظهور  " : "") +
-                    (!usage ? "إذن استخدام التطبيقات" : ""));
+            monitorStatus.setText("● يحتاج إذن الظهور فوق التطبيقات فقط");
             monitorStatus.setTextColor(0xffffc88b);
         }
     }
