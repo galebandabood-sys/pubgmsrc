@@ -355,7 +355,7 @@ void DrawMenu()
                         ImGui::Checkbox(GetLabel("Draw enemy line",     "Düşman Çizgisi"),     &Config.ESPMenu.Line);
                         ImGui::Checkbox(GetLabel("Draw enemy box",      "Düşman Kutusu"),      &Config.ESPMenu.Box);
                         ImGui::Checkbox(GetLabel("Show enemy name",     "Düşman İsmi"),        &Config.ESPMenu.Name);
-                        ImGui::Checkbox(GetLabel("Show enemy uid",       "Düşman UID"),         &Config.ESPMenu.TeamID);                       
+                        ImGui::TextDisabled("%s", GetLabel("Enemy UID unavailable in this SDK", "Düşman UID bu SDK'da yok"));                       
                         ImGui::Checkbox(GetLabel("Show enemy team",      "Takım Numarası"),     &Config.ESPMenu.TeamID);                       
                         ImGui::Checkbox(GetLabel("Show enemy health",   "Can Barı"),           &Config.ESPMenu.Health);
                         ImGui::Checkbox(GetLabel("Show enemy distance", "Mesafe"),             &Config.ESPMenu.Distance);
@@ -1085,55 +1085,15 @@ LOGI(OBFUSCATE("MODE BUY @zakrovich"));
 
 
 
+// Legacy cleanup deleted game files, databases and preferences. It is unsafe
+// and cannot repair crashes or bans reliably, so keep compatibility stubs.
 void FixGameCrash() {
-        system("rm -rf /data/data/com.pubg.imobile/files/");
-        
-        system("rm -rf /data/data/com.pubg.imobile/files/obblib");
-        system("touch /data/data/com.pubg.imobile/files/obblib");
-        system("chmod 000 /data/data/com.pubg.imobile/files/obblib");
-        
-        system("rm -rf /data/data/com.pubg.imobile/files/xlog");
-        system("touch /data/data/com.pubg.imobile/files/xlog");
-        system("chmod 000 /data/data/com.pubg.imobile/files/xlog");
-        
-        system("rm -rf /data/data/com.pubg.imobile/app_bugly");
-        system("touch /data/data/com.pubg.imobile/app_bugly");
-        system("chmod 000 /data/data/com.pubg.imobile/app_bugly");
-        
-        system("rm -rf /data/data/com.pubg.imobile/app_crashrecord");
-        system("touch /data/data/com.pubg.imobile/app_crashrecord");
-        system("chmod 000 /data/data/com.pubg.imobile/app_crashrecord");
-        
-        system("rm -rf /data/data/com.pubg.imobile/app_crashSight");
-        system("touch /data/data/com.pubg.imobile/app_crashSight");
-        system("chmod 000 /data/data/com.pubg.imobile/app_crashSight");
-  
-  system("rm -rf /data/data/com.pubg.imobile/files/ano_tmp");
-        system("touch /data/data/com.pubg.imobile/files/ano_tmp");
-        system("chmod 000 /data/data/com.pubg.imobile/files/ano_tmp");
-  }
+    LOGI("Legacy game-data cleanup is disabled: no game files will be deleted.");
+}
 
 void banfixer() {
-        system("rm -rf /data/data/com.pubg.imobile/shared_prefs");
-        system("mkdir /data/data/com.pubg.imobile/shared_prefs");
-        system("chmod 777 /data/data/com.pubg.imobile/shared_prefs");
-        
-        system("rm -rf /data/data/com.pubg.imobile/files");
-        system("rm -rf /data/data/com.pubg.imobile/databases");
-        system("rm -rf /data/data/com.pubg.imobile/files/login-identifier.txt");
-        
-        system("rm -rf /data/data/com.pubg.imobile/files/UE4Game/ShadowTrackerExtra/ShadowTrackerExtra/Intermediate");
-        system("rm -rf /data/data/com.pubg.imobile/files/UE4Game/ShadowTrackerExtra/ShadowTrackerExtra/Intermediate");
-        
-        system("rm -rf /data/data/com.pubg.imobile/files/TGPA");
-        system("rm -rf /data/data/com.pubg.imobile/files/TGPA");
-        
-        system("rm -rf /data/data/com.pubg.imobile/files/ProgramBinaryCache");
-        system("rm -rf /data/data/com.pubg.imobile/files/ProgramBinaryCache");
-        
-        system("chmod -R 000 /data/data/com.pubg.imobile/files/ano_tmp/ano.ano3.dat");
-
- }
+    LOGI("Legacy game-data deletion is disabled: no ban fix is claimed.");
+}
  
 //======================================================================================//
 void* main_thread(void*) {

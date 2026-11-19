@@ -1,0 +1,62 @@
+{
+  "analysis_type": "READ_ONLY_LEGACY_OFFSET_SEGMENT_AUDIT",
+  "source": "2026-11-18 user-uploaded libUE4.so, 258830456 bytes",
+  "target": "com.tencent.ig 4.7.0 build 21740",
+  "sha256": "9e5b96f709d38a2eaf7f186487fb8e2430e45593b7e33d7d5fd51eca83d78e3a",
+  "inspected_with": [
+    "ELF64 program header parsing",
+    "LLVM llvm-objdump 17 AArch64 disassembly"
+  ],
+  "offsets": [
+    {
+      "name": "GNames_Offset",
+      "old": "0x8939470",
+      "segment": "R-X",
+      "status": "UNVERIFIED",
+      "observation": "At the address, disassembly starts with ldr/adrp/add/ldp/ret, consistent with near a function tail rather than verified entry"
+    },
+    {
+      "name": "GUObject_Offset",
+      "old": "0xef3b3f0",
+      "segment": "RW-",
+      "status": "UNVERIFIED",
+      "observation": "Address is mapped data; object layout and semantics not established"
+    },
+    {
+      "name": "ShootBulletInner_Offset",
+      "old": "0x6dfe100",
+      "segment": "R-X",
+      "status": "UNVERIFIED",
+      "observation": "Disassembles as instructions; no semantic/function identity verification"
+    },
+    {
+      "name": "GetMuzzleTransform_Offset",
+      "old": "0x6e17390",
+      "segment": "R-X",
+      "status": "UNVERIFIED",
+      "observation": "Disassembles as instructions; no semantic/function identity verification"
+    },
+    {
+      "name": "ProcessEvent_Offset",
+      "old": "0x8bac0a8",
+      "segment": "R-X",
+      "status": "FAILS_CLEAN_DISASSEMBLY",
+      "observation": "llvm-objdump reports <unknown> for 0x8bac0a8 and 0x8bac0b0 and several nearby words; cannot treat as valid hook entry"
+    },
+    {
+      "name": "GetActorArray",
+      "old": "0xa6ca440",
+      "segment": "R-X",
+      "status": "FAILS_CLEAN_DISASSEMBLY",
+      "observation": "llvm-objdump reports <unknown> for multiple consecutive words from 0xa6ca440; cannot treat as verified function entry"
+    },
+    {
+      "name": "GNativeAndroidApp_Offset",
+      "old": "0xec732a8",
+      "segment": "RW-",
+      "status": "UNVERIFIED",
+      "observation": "Mapped writable data, initially zero; pointer semantics not established"
+    }
+  ],
+  "disclaimer": "Disassembly of noncode or packed/obfuscated bytes may yield unknown instructions. A segment match is not a function identity test. No 4.7 SDK/offsets or live ESP/aimbot implementation verified. Do not inject these old offsets."
+}
