@@ -138,13 +138,50 @@ public final class MainActivity extends Activity {
         brand.setTextDirection(View.TEXT_DIRECTION_LTR);
         brand.setGravity(Gravity.CENTER);
         content.addView(brand);
-        TextView subtitle = label("MANUAL OVERLAY HUD   •   5.2 / PUBG 4.7",
+        TextView subtitle = label("ONE-TAP ROOT LAUNCHER   •   5.3 / PUBG 4.7",
                 12, 0xffb99bea, false);
         subtitle.setTextDirection(View.TEXT_DIRECTION_LTR);
         subtitle.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams subParams = new LinearLayout.LayoutParams(-1, -2);
         subParams.bottomMargin = dp(27);
         content.addView(subtitle, subParams);
+
+        LinearLayout oneTap = card();
+        addText(oneTap, "زر واحد: منظور الآيباد + Frost", 22, WHITE, true, 0);
+        addText(oneTap,
+                "يشغّل النسخ الموجودة سابقاً عندك داخل /data/local/tmp بصلاحيات KernelSU. " +
+                "ما يثبت ملفات جديدة ولا يحمّل درايفر: Frost يستخدم خيار 16 (بدون درايفر)، " +
+                "PUBG Global رقم 1، وتشغيل الخلفية رقم 1. " +
+                "الملفات الخارجية غير مفحوصة بالكامل؛ لا تضغط مرتين.",
+                13, MUTED, false, 10);
+        Button bothTools = primaryButton("تشغيل منظور الآيباد ومنيو Frost");
+        addButton(oneTap, bothTools, 14);
+        TextView bothStatus = label("جاهز • يحتاج موافقة الروت مرة واحدة", 13, 0xffdcc7ff, false);
+        LinearLayout.LayoutParams bothParams = new LinearLayout.LayoutParams(-1, -2);
+        bothParams.topMargin = dp(11);
+        oneTap.addView(bothStatus, bothParams);
+        bothTools.setOnClickListener(v -> {
+            bothTools.setEnabled(false);
+            bothStatus.setText("جاري إرسال أوامر التشغيل عبر الروت...");
+            ExternalToolsLauncher.start((exit, output) -> {
+                bothTools.setEnabled(true);
+                final String message;
+                if (exit == 0) {
+                    message = "انتهت أوامر التشغيل بدون خطأ من الطرفية؛ افتح ببجي وتأكد من المنيو والمنظور بنفسك. هذا مو تأكيد لعملهما داخل اللعبة.";
+                } else if (output.contains("MISSING_IPAD")) {
+                    message = "ملف /data/local/tmp/ipad-irch غير موجود أو مو قابل للتنفيذ.";
+                } else if (output.contains("MISSING_FROST")) {
+                    message = "ملف /data/local/tmp/frost-v37 غير موجود أو مو قابل للتنفيذ.";
+                } else if (output.contains("MISSING_FROST_KEY")) {
+                    message = "المفتاح /data/local/tmp/Frost.Key غير موجود.";
+                } else {
+                    message = "التشغيل توقف بخطأ (code " + exit + ").";
+                }
+                String tail = output.length() > 700 ?
+                        output.substring(output.length() - 700) : output;
+                bothStatus.setText(message + (tail.isEmpty() ? "" : "\\n" + tail));
+            });
+        });
 
         LinearLayout hero = card();
         addText(hero, "إصدار المطوّر  /  ARM64", 13, 0xffc9b3f3, false, 0);
