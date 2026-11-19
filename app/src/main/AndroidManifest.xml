@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.RIYAZSRC">
 
-    <!-- Android window overlay explicitly granted by the user. No game-data access, root or VPN. -->
+    <!-- Overlay is opt-in. Additional explicit button may invoke user-authorized KernelSU root to run two pre-existing external binaries. No root used for standalone HUD. -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <queries>
