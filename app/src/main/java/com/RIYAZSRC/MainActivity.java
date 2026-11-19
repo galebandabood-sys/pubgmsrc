@@ -179,7 +179,7 @@ public final class MainActivity extends Activity {
                 }
                 String tail = output.length() > 700 ?
                         output.substring(output.length() - 700) : output;
-                bothStatus.setText(message + (tail.isEmpty() ? "" : "\\n" + tail));
+                bothStatus.setText(message + (tail.isEmpty() ? "" : "\n" + tail));
             });
         });
 
@@ -250,7 +250,7 @@ public final class MainActivity extends Activity {
         addText(available,
                 "ESP والإيم وNo Recoil وMagic Bullet غير مفعّلة، لأن إزاحات SDK القديم غير متحققة لببجي 4.7. لن نعرضها كمفاتيح فعّالة وهمية.",
                 13, 0xffffc88b, false, 12);
-        addText(available, "لا روت ولا وصول الاستخدام ولا OBB. بعد خروجك من اللعبة، أوقف الفقاعة من الإشعار أو NOVA.", 12, MUTED, false, 12);
+        addText(available, "واجهة HUD مستقلة ولا تحتاج روت. زر التشغيل المزدوج اختياري ويستخدم الروت، ويشغّل فقط الملفات المثبتة سابقاً بجهازك. لا نضمن عمل ملفات الطرف الثالث.", 12, MUTED, false, 12);
         updateLibraryStatus();
         updateMonitorStatus();
     }
